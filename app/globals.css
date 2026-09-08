@@ -1,26 +1,31 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    font-family: var(--font-sans), sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes fluid-blob-1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(50px, -80px) scale(1.15); }
+  66% { transform: translate(-40px, 40px) scale(0.9); }
 }
+
+@keyframes fluid-blob-2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(-60px, 60px) scale(1.1); }
+  66% { transform: translate(50px, -50px) scale(0.95); }
+}
+
+@keyframes fluid-blob-3 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(40px, 60px) scale(1.05); }
+  66% { transform: translate(-50px, -70px) scale(1.1); }
+}
+
+.animate-fluid-1 { animation: fluid-blob-1 18s ease-in-out infinite; }
+.animate-fluid-2 { animation: fluid-blob-2 22s ease-in-out infinite; }
+.animate-fluid-3 { animation: fluid-blob-3 25s ease-in-out infinite; }
