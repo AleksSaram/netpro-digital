@@ -5,27 +5,66 @@ import { motion, AnimatePresence } from "framer-motion";
 import Tilt from "react-parallax-tilt";
 import InteractiveCanvas from "@/app/components/InteractiveCanvas";
 import FluidBackground from "@/app/components/FluidBackground";
-import BackgroundO3D from "@/app/components/BackgroundO3D";
 import Navbar from "@/app/components/Navbar";
-import { 
-  ArrowUpRight, 
-  CheckCircle2, 
-  Send, 
-  Terminal, 
-  Calendar, 
-  TrendingUp, 
-  Video, 
-  Share2, 
-  Compass, 
-  Code2, 
-  Target, 
-  Users, 
-  Cpu 
-} from "lucide-react";
-import { servicesData } from "@/app/lib/servicesData";
-import { projectsData } from "@/app/lib/projectsData";
+import { ArrowUpRight, CheckCircle2, Send, Terminal, Calendar, MessageSquare, TrendingUp, Video, Share2, Compass, Code2, Target, Clock, Check, ChevronRight } from "lucide-react";
 
-// Función auxiliar para renderizar el icono correspondiente a cada pilar
+const servicesData = [
+  {
+    id: "consultoria",
+    number: "01",
+    title: "Estrategia, Consultoría & Capacitación",
+    description: "Diagnóstico comercial, escalado de embudos, talleres para empresas y programas de formación intensiva (1 a 1).",
+    features: ["Auditoría de negocio", "Talleres corporativos y equipos", "Mentoría y cursos personalizados 1 a 1"],
+    highlight: true,
+    iconName: "TrendingUp"
+  },
+  {
+    id: "contenido",
+    number: "02",
+    title: "Creación de Contenido",
+    description: "Producción audiovisual y piezas gráficas diseñadas para capturar atención y retener audiencias.",
+    features: ["Dirección de arte", "Edición de alto impacto", "Guiones comerciales"],
+    highlight: false,
+    iconName: "Video"
+  },
+  {
+    id: "redes",
+    number: "03",
+    title: "Gestión Integral de Redes",
+    description: "Operativa diaria, calendarización y posicionamiento de autoridad en tus plataformas clave.",
+    features: ["Calendario editorial", "Community management", "Reportes de crecimiento"],
+    highlight: false,
+    iconName: "Share2"
+  },
+  {
+    id: "branding",
+    number: "04",
+    title: "Branding e Identidad de Marca",
+    description: "Construcción de marcas memorables, minimalistas y con un fuerte sentido de distinción en el mercado.",
+    features: ["Manual de identidad", "Rediseño de marca", "Estrategia visual"],
+    highlight: false,
+    iconName: "Compass"
+  },
+  {
+    id: "web",
+    number: "05",
+    title: "Diseño y Desarrollo Web Inmersivo",
+    description: "Sitios web de ultra alta velocidad, interactivos y optimizados para la máxima conversión de leads.",
+    features: ["Desarrollo Next.js / React", "Animaciones fluidas", "Optimización SEO técnica"],
+    highlight: false,
+    iconName: "Code2"
+  },
+  {
+    id: "ads",
+    number: "06",
+    title: "Publicidad Digital (Meta Ads)",
+    description: "Campañas de pauta hipersegmentadas orientadas a la generación de prospectos cualificados y retorno directo.",
+    features: ["Estrategia de pauta", "Segmentación avanzada", "A/B Testing continuo"],
+    highlight: false,
+    iconName: "Target"
+  }
+];
+
 const renderServiceIcon = (iconName: string) => {
   const props = { className: "w-6 h-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" };
   switch (iconName) {
@@ -35,16 +74,125 @@ const renderServiceIcon = (iconName: string) => {
     case "Compass": return <Compass {...props} />;
     case "Code2": return <Code2 {...props} />;
     case "Target": return <Target {...props} />;
-    case "Users": return <Users {...props} />;
-    case "Cpu": return <Cpu {...props} />;
     default: return <TrendingUp {...props} />;
   }
 };
+
+// MARCAS REALES CON GRAN SALÓN KUN CORREGIDO
+const realPartners = [
+  {
+    id: "dr-noe",
+    name: "Dr Noé Herrera",
+    category: "Salud & Autoridad Médica",
+    description: "Estrategia de posicionamiento digital, pauta publicitaria en Meta Ads y optimización de captación de pacientes para consulta especializada.",
+    metrics: "+180% Leads Qualificados",
+    image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "univ-nuevo-siglo",
+    name: "Universidad Nuevo Siglo",
+    category: "Educación Superior",
+    description: "Desarrollo de campañas de captación de matrículas, gestión integral de contenidos educativos y pauta digital enfocada en admisiones.",
+    metrics: "Escalamiento Institucional",
+    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "bugu",
+    name: "BuGu Guardería",
+    category: "Servicios Infantiles",
+    description: "Estrategia de branding, generación de confianza en comunidades locales y campañas orientadas a la retención y captación de inscripciones.",
+    metrics: "Alta Conversión Local",
+    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "clinical-manager",
+    name: "Clinical Manager",
+    category: "Software & Salud",
+    description: "Ecosistema digital y arquitectura de marca para soluciones de gestión clínica orientada a hospitales y profesionales de la salud.",
+    metrics: "Autoridad B2B",
+    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "ivonne-razo",
+    name: "Ivonne Razo Terramar",
+    category: "Social Commerce & Belleza",
+    description: "Sitio web interactivo con catálogo flipbook digital, automatización de prospectos y gestión de pauta comercial de alto impacto.",
+    metrics: "Catálogo Interactivo",
+    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "rs-mobiliario",
+    name: "RS Mobiliario",
+    category: "Diseño & Mobiliario de Alta Gama",
+    description: "Exhibición digital de portafolio residencial y comercial, campañas visuales de captación de clientes de diseño de interiores.",
+    metrics: "Exhibición Premium",
+    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "gran-salon-kun",
+    name: "Gran Salón Kun",
+    category: "Eventos & Salones",
+    description: "Estrategia integral de posicionamiento digital, identidad visual y campañas de atracción comercial en plataformas interactivas para eventos.",
+    metrics: "Posicionamiento Regional",
+    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "academia-andrea",
+    name: "Academia Andrea",
+    category: "Formación & Estética",
+    description: "Campañas de prospección para cursos intensivos, creación de contenido audiovisual y automatización de admisiones por WhatsApp.",
+    metrics: "Llenado de Cursos",
+    image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "saboreate",
+    name: "Saboreate Carritos de Snacks",
+    category: "Eventos & Experiencias",
+    description: "Estrategia de redes sociales, dirección de arte para eventos sociales y corporativos, y pauta publicitaria local.",
+    metrics: "Agenda Reventada",
+    image: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  },
+  {
+    id: "jl-event",
+    name: "JL Event Planers",
+    category: "Bodas & Eventos de Lujo",
+    description: "Diseño web de experiencias inmersivas, branding de alto nivel y pauta publicitaria segmentada para bodas destino y eventos exclusivos.",
+    metrics: "Bodas & Destinos VIP",
+    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1000",
+    link: "#"
+  }
+];
+
+const timeSlots = [
+  "09:00 AM - 09:45 AM",
+  "10:00 AM - 10:45 AM",
+  "11:00 AM - 11:45 AM",
+  "12:00 PM - 12:45 PM",
+  "03:00 PM - 03:45 PM",
+  "04:00 PM - 04:45 PM",
+  "05:00 PM - 05:45 PM"
+];
 
 export default function Home() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+  
+  const [expandedPartner, setExpandedPartner] = useState<string | null>(realPartners[0].id);
+
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [clientName, setClientName] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedSlot, setSelectedSlot] = useState('');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,89 +204,91 @@ export default function Home() {
     }, 1000);
   };
 
-  // Filtrado de proyectos según la categoría activa
-  const filteredProjects = activeCategory === 'all' 
-    ? projectsData 
-    : projectsData.filter(project => project.categoryKey === activeCategory);
+  const handleBookingConfirm = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDate || !selectedSlot || !clientName) return;
+    
+    const message = encodeURIComponent(`Hola, soy *${clientName}*. Quiero agendar una sesión estratégica de 45 minutos para el día *${selectedDate}* en el horario de *${selectedSlot}*. Quedo atento a la confirmación.`);
+    window.open(`https://wa.me/4481204807?text=${message}`, '_blank');
+    setIsBookingOpen(false);
+  };
 
   return (
     <div className="relative min-h-screen text-[#111113] overflow-hidden selection:bg-[#ff2a2a] selection:text-white font-sans">
       
-      {/* NAVBAR FLOTANTE CON LIQUID GLASS */}
       <Navbar />
-
-      {/* CAPAS DE FONDO */}
       <FluidBackground />
-      <BackgroundO3D />
       <InteractiveCanvas />
 
-      {/* ================= HERO STUDIO ================= */}
-      <section className="relative min-h-[90vh] flex items-center justify-center px-6 pt-36 pb-20 z-10">
-        <div className="max-w-7xl mx-auto text-center relative z-10 w-full">
-          
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/60 border border-white/80 shadow-sm backdrop-blur-md mb-8"
-          >
-            <Terminal className="w-3.5 h-3.5 text-[#ff2a2a]" />
-            <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-gray-700 font-semibold">
-              NetPro Digital Studio // Estrategia y Crecimiento
-            </span>
-          </motion.div>
-
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] mb-8 text-gray-900 max-w-5xl mx-auto"
-          >
-            Elevando marcas mediante <br className="hidden sm:inline"/>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-[#ff2a2a]">
-              estrategia digital y web inmersivas
-            </span>
-          </motion.h1>
-
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto font-normal leading-relaxed mb-12 tracking-wide"
-          >
-            Consultoría experta, creación de contenido, gestión de redes y sistemas de conversión diseñados para dominar tu mercado con autoridad absoluta.
-          </motion.p>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <a
-              href="#contacto"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#ff2a2a] text-white font-semibold px-8 py-4 rounded-full hover:bg-red-600 transition-all duration-300 shadow-lg shadow-red-500/20 text-xs tracking-widest uppercase"
-            >
-              <span>Iniciar Proyecto</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </a>
+      {/* ================= HERO ALINEADO A LA IZQUIERDA ================= */}
+      <section className="relative min-h-[95vh] flex items-center px-6 pt-44 pb-24 z-10">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="max-w-4xl">
             
-            <a
-              href="https://cal.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/60 backdrop-blur-md text-gray-900 border border-white/80 font-semibold px-8 py-4 rounded-full hover:bg-white/80 transition-all duration-300 text-xs tracking-widest uppercase shadow-xs"
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-3 px-4.5 py-2 rounded-full bg-white/75 border border-white/90 shadow-sm backdrop-blur-md mb-8"
             >
-              <Calendar className="w-4 h-4 text-[#ff2a2a]" />
-              <span>Agendar Sesión (15 min)</span>
-            </a>
-          </motion.div>
+              <span className="w-2.5 h-2.5 rounded-full bg-[#ff2a2a] animate-ping"></span>
+              <span className="text-[11px] font-mono tracking-[0.25em] uppercase text-gray-800 font-bold">
+                NetPro Digital Studio // High-End Agency
+              </span>
+            </motion.div>
 
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] mb-8 text-gray-900"
+            >
+              Elevando marcas mediante <br className="hidden sm:inline"/>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-[#ff2a2a]">
+                estrategia digital y web inmersivas
+              </span>
+            </motion.h1>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-base sm:text-lg text-gray-600 max-w-2xl font-normal leading-relaxed mb-12 tracking-wide"
+            >
+              Consultoría experta, creación de contenido, gestión de redes y sistemas de conversión diseñados para dominar tu mercado con autoridad absoluta.
+            </motion.p>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4"
+            >
+              <a
+                href="https://wa.me/4481204807"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2.5 bg-[#ff2a2a] text-white font-semibold px-9 py-4 rounded-full hover:bg-red-600 transition-all duration-300 shadow-xl shadow-red-500/20 text-xs tracking-widest uppercase"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Contacto</span>
+              </a>
+              
+              <button
+                onClick={() => setIsBookingOpen(true)}
+                className="inline-flex items-center justify-center gap-2.5 bg-white/80 backdrop-blur-md text-gray-900 border border-white/90 font-semibold px-9 py-4 rounded-full hover:bg-white transition-all duration-300 text-xs tracking-widest uppercase shadow-xs cursor-pointer"
+              >
+                <Calendar className="w-4 h-4 text-[#ff2a2a]" />
+                <span>Agendar Sesión (45 min)</span>
+              </button>
+            </motion.div>
+
+          </div>
         </div>
       </section>
 
-      {/* ================= BENTO GRID DE LOS 8 PILARES (CON ICONOS MINIMALISTAS ANIMADOS) ================= */}
-      <section id="servicios" className="py-28 px-6 relative z-10 border-t border-white/40 bg-white/30 backdrop-blur-md">
+      {/* ================= BENTO GRID DE LOS 6 PILARES ================= */}
+      <section id="servicios" className="py-28 px-6 relative z-10 bg-white/30 backdrop-blur-md">
         <div className="max-w-7xl mx-auto">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
@@ -151,7 +301,7 @@ export default function Home() {
               </h2>
             </div>
             <p className="text-gray-600 max-w-md text-sm leading-relaxed">
-              Desde la consultoría directiva y creación de contenido hasta la formación de equipos de alto rendimiento.
+              Consultoría directiva, talleres corporativos, programas personalizados y ejecución digital de alto rendimiento.
             </p>
           </div>
 
@@ -176,8 +326,7 @@ export default function Home() {
                   }`}
                 >
                   <div>
-                    {/* CABECERA DE LA TARJETA: ICONO ANIMADO Y NÚMERO */}
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center justify-between mb-6">
                       <div className="w-14 h-14 rounded-2xl bg-white/80 backdrop-blur-md border border-white/90 shadow-sm flex items-center justify-center text-gray-800 group-hover:bg-[#ff2a2a] group-hover:text-white transition-all duration-500">
                         {renderServiceIcon(service.iconName)}
                       </div>
@@ -186,22 +335,16 @@ export default function Home() {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#ff2a2a] transition-colors">
-                        {service.title}
-                      </h3>
-                      <div className="w-8 h-8 rounded-xl bg-white/50 backdrop-blur-xs flex items-center justify-center group-hover:bg-[#ff2a2a] group-hover:text-white transition-all duration-300 border border-white/60 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 flex-shrink-0">
-                        <ArrowUpRight className="w-3.5 h-3.5" />
-                      </div>
-                    </div>
-
-                    <p className="text-gray-600 text-sm leading-relaxed mb-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#ff2a2a] transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-6">
                       {service.description}
                     </p>
                   </div>
 
-                  <div className="border-t border-gray-200/50 pt-6">
-                    <ul className="space-y-2.5">
+                  <div className="border-t border-gray-200/50 pt-5">
+                    <ul className="space-y-2">
                       {service.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center gap-2.5 text-xs font-medium text-gray-700">
                           <CheckCircle2 className="w-4 h-4 text-[#ff2a2a] flex-shrink-0" />
@@ -218,163 +361,115 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= CASOS DE ESTUDIO (CON FILTROS INTERACTIVOS) ================= */}
-      <section id="proyectos" className="py-28 px-6 relative z-10 border-t border-white/40 bg-transparent">
+      {/* ================= NUESTRAS ALIANZAS INTERACTIVAS ================= */}
+      <section id="alianzas" className="py-28 px-6 relative z-10 border-t border-white/40 bg-white/20 backdrop-blur-md">
         <div className="max-w-7xl mx-auto">
           
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div>
               <span className="text-xs font-mono tracking-widest uppercase text-[#ff2a2a] bg-red-50/80 backdrop-blur-xs px-3 py-1 rounded-full border border-red-100 font-semibold">
-                02 // Casos de Estudio
+                02 // Alianzas & Clientes
               </span>
               <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 text-gray-900">
-                Impacto Comprobado
+                Nuestras Alianzas
               </h2>
             </div>
             <p className="text-gray-600 max-w-md text-sm leading-relaxed">
-              Desarrollos recientes diseñados bajo los más altos estándares de estrategia, tecnología y conversión digital.
+              Haz clic en cualquier marca para explorar el impacto estratégico, la imagen de referencia y los resultados entregados.
             </p>
           </div>
 
-          {/* PESTAÑAS DE FILTRADO */}
-          <div className="flex flex-wrap items-center gap-2 mb-12">
-            {[
-              { key: 'all', label: 'Todos los Proyectos' },
-              { key: 'web', label: 'Web & Inmersivo' },
-              { key: 'realestate', label: 'Real Estate' },
-              { key: 'branding', label: 'Branding & Video' },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveCategory(tab.key)}
-                className={`px-5 py-2.5 rounded-full text-xs font-mono font-medium backdrop-blur-md border transition-all duration-300 cursor-pointer ${
-                  activeCategory === tab.key
-                    ? 'bg-[#ff2a2a] text-white border-[#ff2a2a] shadow-md shadow-red-500/20'
-                    : 'bg-white/70 border-white text-gray-700 hover:border-[#ff2a2a] hover:text-[#ff2a2a]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Lista de Marcas (Columna 1) */}
+            <div className="lg:col-span-1 flex flex-col gap-2.5 max-h-[620px] overflow-y-auto pr-2">
+              {realPartners.map((partner) => {
+                const isSelected = expandedPartner === partner.id;
+                return (
+                  <button
+                    key={partner.id}
+                    onClick={() => setExpandedPartner(partner.id)}
+                    className={`w-full text-left px-5 py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-between border cursor-pointer ${
+                      isSelected
+                        ? 'bg-gray-900 text-white border-gray-900 shadow-xl shadow-gray-900/10 scale-[1.01]'
+                        : 'bg-white/60 backdrop-blur-md text-gray-800 border-white/80 hover:bg-white hover:border-red-200'
+                    }`}
+                  >
+                    <div>
+                      <span className={`text-[10px] font-mono uppercase tracking-widest block mb-0.5 ${isSelected ? 'text-red-400' : 'text-gray-500'}`}>
+                        {partner.category}
+                      </span>
+                      <span className="font-bold text-sm tracking-tight">
+                        // {partner.name}
+                      </span>
+                    </div>
+                    <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isSelected ? 'rotate-90 text-[#ff2a2a]' : 'text-gray-400'}`} />
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* GRID DE PROYECTOS DINÁMICO */}
-          <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <AnimatePresence>
-              {filteredProjects.map((project, index) => (
-                <motion.div
-                  key={project.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="group bg-white/60 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgb(255,42,42,0.08)] hover:border-red-200 transition-all duration-500 flex flex-col justify-between"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
-                    <img 
-                      src={project.image} 
-                      alt={project.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    
-                    {/* Botón flotante al hacer hover si el proyecto tiene enlace */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                      {project.link && (
-                        <a 
-                          href={project.link} 
-                          target="_blank" 
+            {/* Panel de Detalle con Imagen (Columnas 2 y 3) */}
+            <div className="lg:col-span-2">
+              <AnimatePresence mode="wait">
+                {realPartners.map((partner) => {
+                  if (partner.id !== expandedPartner) return null;
+                  return (
+                    <motion.div
+                      key={partner.id}
+                      initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                      transition={{ duration: 0.4 }}
+                      className="bg-white/85 backdrop-blur-2xl rounded-3xl p-6 sm:p-10 border border-white shadow-[0_20px_50px_rgb(0,0,0,0.06)] relative overflow-hidden flex flex-col justify-between h-full min-h-[500px]"
+                    >
+                      <div>
+                        {/* Imagen de referencia del proyecto */}
+                        <div className="relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden mb-6 shadow-inner bg-gray-100">
+                          <img 
+                            src={partner.image} 
+                            alt={partner.name} 
+                            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                          
+                          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/50 shadow-xs">
+                            <span className="text-[10px] font-mono font-bold text-[#ff2a2a] uppercase tracking-wider">
+                              {partner.category}
+                            </span>
+                          </div>
+
+                          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
+                            <span className="text-xs font-mono font-medium tracking-wide bg-black/40 backdrop-blur-md px-3 py-1 rounded-lg">
+                              {partner.metrics}
+                            </span>
+                          </div>
+                        </div>
+
+                        <h3 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 tracking-tight">
+                          {partner.name}
+                        </h3>
+                        <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
+                          {partner.description}
+                        </p>
+                      </div>
+
+                      <div className="pt-5 border-t border-gray-100 flex items-center justify-between">
+                        <span className="text-xs font-mono text-gray-400">NetPro Digital Studio Partnership</span>
+                        <a
+                          href={partner.link}
+                          target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 bg-white text-gray-900 font-semibold px-5 py-2.5 rounded-full text-xs tracking-wider uppercase shadow-lg hover:bg-[#ff2a2a] hover:text-white transition-colors"
+                          className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-6 py-3 rounded-full hover:bg-red-600 transition-all duration-300 text-xs tracking-wider uppercase shadow-md shadow-red-500/20"
                         >
                           <span>Visitar Proyecto</span>
                           <ArrowUpRight className="w-3.5 h-3.5" />
                         </a>
-                      )}
-                    </div>
-
-                    <div className="absolute top-4 left-4 bg-white/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white shadow-xs">
-                      <span className="text-[11px] font-mono font-bold text-[#ff2a2a] tracking-wider uppercase">
-                        {project.metrics}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-mono uppercase tracking-widest text-gray-500">
-                        {project.number} // {project.category}
-                      </span>
-                    </div>
-
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#ff2a2a] transition-colors">
-                      {project.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed mb-6">
-                      {project.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200/50">
-                      {project.tags.map((tag, idx) => (
-                        <span key={idx} className="text-[11px] font-mono bg-white/70 backdrop-blur-xs border border-white px-3 py-1 rounded-full text-gray-700">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-
-        </div>
-      </section>
-
-      {/* ================= SECCIÓN DE AUTORIDAD & ESTUDIO ================= */}
-      <section id="autoridad" className="py-28 px-6 relative z-10 border-t border-white/40 bg-white/30 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto">
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            
-            <div className="lg:col-span-6">
-              <span className="text-xs font-mono tracking-widest uppercase text-[#ff2a2a] bg-red-50/80 backdrop-blur-xs px-3 py-1 rounded-full border border-red-100 font-semibold">
-                03 // Liderazgo y Visión
-              </span>
-              
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mt-6 mb-6 leading-tight text-gray-900">
-                Estrategia de precisión unida a un diseño sin concesiones.
-              </h2>
-              
-              <p className="text-gray-600 text-base leading-relaxed mb-6">
-                Liderado por <strong className="text-gray-900 font-medium">Ricardo Zúñiga</strong>, NetPro Digital Studio fusiona consultoría de negocio pura con ejecución creativa de alto nivel. Cada proyecto se diseña para que tu marca mande con autoridad.
-              </p>
-
-              <div className="grid grid-cols-2 gap-6 pt-6 border-t border-gray-200/60">
-                <div>
-                  <span className="block text-3xl font-extrabold text-gray-900 mb-1">100%</span>
-                  <span className="text-xs font-mono uppercase tracking-wider text-gray-500">Enfoque Estratégico</span>
-                </div>
-                <div>
-                  <span className="block text-3xl font-extrabold text-[#ff2a2a] mb-1">Boutique</span>
-                  <span className="text-xs font-mono uppercase tracking-wider text-gray-500">Acompañamiento 1 a 1</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-6">
-              <Tilt tiltMaxAngleX={5} tiltMaxAngleY={5} perspective={1000}>
-                <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-white bg-white/60 backdrop-blur-xl">
-                  <img 
-                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop" 
-                    alt="Global Studio Workspace" 
-                    className="w-full h-full object-cover opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent flex flex-col justify-end p-8 text-white">
-                    <span className="text-xs font-mono tracking-widest text-[#ff2a2a] uppercase mb-1 font-semibold">Estándar de Ejecución</span>
-                    <p className="text-xl font-bold">Diseñado para marcas que se niegan a pasar desapercibidas.</p>
-                  </div>
-                </div>
-              </Tilt>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
 
           </div>
@@ -382,16 +477,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= CONTACTO STUDIO (LIQUID GLASS CARD) ================= */}
+      {/* ================= CONTACTO STUDIO (CONTÁCTANOS Y EMPIEZA A CRECER) ================= */}
       <section id="contacto" className="py-28 px-6 relative z-10 border-t border-white/40 bg-transparent">
         <div className="max-w-4xl mx-auto bg-white/60 backdrop-blur-2xl rounded-3xl p-8 sm:p-14 border border-white/90 shadow-[0_20px_50px_rgb(0,0,0,0.06)] relative">
           
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-xs font-mono tracking-widest uppercase text-[#ff2a2a] bg-red-50/80 backdrop-blur-xs px-3 py-1 rounded-full border border-red-100 font-semibold">
-              04 // Contacto Directo
+              03 // Contacto Directo
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 text-gray-900">
-              Construyamos Algo Icónico
+              Contáctanos y empieza a crecer
             </h2>
           </div>
 
@@ -408,7 +503,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Brief Recibido con Éxito</h3>
                 <p className="text-gray-600 max-w-md mx-auto text-sm leading-relaxed">
-                  Gracias por ponerte en contacto. Ricardo Zúñiga analizará tu propuesta y se pondrá en contacto contigo en menos de 24 horas hábiles.
+                  Gracias por ponerte en contacto. Analizaremos tu propuesta y nos pondremos en contacto contigo en menos de 24 horas hábiles.
                 </p>
                 <button
                   onClick={() => setFormSubmitted(false)}
@@ -439,14 +534,12 @@ export default function Home() {
                 <div>
                   <label className="block text-xs font-mono uppercase tracking-wider text-gray-600 mb-2 font-medium">Área de Interés Principal</label>
                   <select className="w-full px-4 py-3.5 rounded-xl bg-white/70 backdrop-blur-xs border border-white text-gray-900 text-sm focus:outline-none focus:border-[#ff2a2a] shadow-inner transition-colors">
-                    <option>01. Estrategia y Consultoría Digital</option>
-                    <option>02. Creación de Contenido para Redes</option>
+                    <option>01. Estrategia, Consultoría, Talleres & Cursos (1 a 1)</option>
+                    <option>02. Creación de Contenido</option>
                     <option>03. Gestión Integral de Redes Sociales</option>
                     <option>04. Branding e Identidad de Marca</option>
                     <option>05. Diseño y Desarrollo Web Inmersivo</option>
                     <option>06. Publicidad Digital (Meta Ads)</option>
-                    <option>07. Talleres para Empresas y Equipos</option>
-                    <option>08. Cursos y Capacitaciones (1 a 1 / Programas)</option>
                   </select>
                 </div>
 
@@ -475,6 +568,94 @@ export default function Home() {
 
         </div>
       </section>
+
+      {/* ================= CALENDARIO DE SESIÓN (45 MIN) ================= */}
+      {isBookingOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md px-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white/95 backdrop-blur-2xl border border-white p-8 rounded-[2rem] max-w-lg w-full shadow-2xl relative"
+          >
+            <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+              <div>
+                <span className="text-[10px] font-mono tracking-widest uppercase text-[#ff2a2a] font-semibold">Reserva Directa</span>
+                <h3 className="text-xl font-extrabold text-gray-900">Sesión Estratégica (45 min)</h3>
+              </div>
+              <button 
+                onClick={() => setIsBookingOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleBookingConfirm} className="space-y-5">
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-gray-600 mb-1.5 font-medium">Tu Nombre o Empresa</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder="Ej. Carlos Mendoza (Nexus Corp)" 
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#ff2a2a]" 
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-gray-600 mb-1.5 font-medium">Selecciona el Día</label>
+                  <input 
+                    type="date" 
+                    required 
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#ff2a2a]" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-gray-600 mb-1.5 font-medium flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-[#ff2a2a]" /> Bloque de 45 min
+                  </label>
+                  <select
+                    required
+                    value={selectedSlot}
+                    onChange={(e) => setSelectedSlot(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#ff2a2a]"
+                  >
+                    <option value="">Selecciona hora...</option>
+                    {timeSlots.map((slot, idx) => (
+                      <option key={idx} value={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="bg-red-50/60 border border-red-100 rounded-2xl p-4 text-xs text-gray-600 leading-relaxed">
+                💡 Al confirmar, se abrirá WhatsApp con los detalles de tu cita de 45 minutos listos para enviar a nuestro equipo de asesores.
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsBookingOpen(false)}
+                  className="w-1/2 bg-gray-100 text-gray-700 font-semibold py-3.5 rounded-xl text-xs uppercase tracking-wider hover:bg-gray-200 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="w-1/2 bg-[#ff2a2a] text-white font-semibold py-3.5 rounded-xl text-xs uppercase tracking-wider hover:bg-red-600 transition-colors shadow-md shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Agendar Cita</span>
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       {/* FOOTER */}
       <footer className="py-12 px-6 border-t border-white/40 bg-white/50 backdrop-blur-md text-center text-xs font-mono text-gray-500 relative z-10">

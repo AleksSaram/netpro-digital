@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
-import Image from 'next/image';
+import { Menu, X, MessageSquare } from 'lucide-react';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -23,31 +22,26 @@ export default function Navbar() {
 
   const navLinks = [
     { name: '01 // Soluciones', href: '#servicios' },
-    { name: '02 // Proyectos', href: '#proyectos' },
-    { name: '03 // Liderazgo', href: '#autoridad' },
-    { name: '04 // Contacto', href: '#contacto' },
+    { name: '02 // Alianzas', href: '#alianzas' },
+    { name: '03 // Contacto', href: '#contacto' },
   ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-6 transition-all duration-300">
       <nav 
-        className={`w-full max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5 transition-all duration-500 rounded-full border ${
+        className={`w-full max-w-7xl mx-auto flex items-center justify-between px-6 py-2.5 transition-all duration-500 rounded-full border overflow-visible ${
           scrolled 
-            ? 'bg-white/70 backdrop-blur-xl border-white/90 shadow-[0_10px_30px_rgb(0,0,0,0.05)]' 
-            : 'bg-white/50 backdrop-blur-md border-white/60 shadow-xs'
+            ? 'bg-white/85 backdrop-blur-2xl border-white/95 shadow-[0_10px_30px_rgb(0,0,0,0.06)]' 
+            : 'bg-white/60 backdrop-blur-xl border-white/80 shadow-xs'
         }`}
       >
-        {/* LOGOTIPO REAL NETPRO DIGITAL */}
-        <a href="#" className="flex items-center gap-3 group cursor-pointer py-1">
-          <div className="relative h-7 w-36">
-            <Image
-              src="/NETPROLOGO.PNG"
-              alt="NetPro Digital"
-              fill
-              className="object-contain object-left transition-transform duration-300 group-hover:scale-[1.02]"
-              priority
-            />
-          </div>
+        {/* LOGOTIPO GRANDE Y LIBRE QUE NO AFECTA LA ALTURA DEL MENÚ */}
+        <a href="#" className="flex items-center group cursor-pointer relative py-1">
+          <img
+            src="/LOGONETPRONUEVONEGATIVO.PNG"
+            alt="NetPro Digital Studio"
+            className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+          />
         </a>
 
         {/* NAVEGACIÓN DESKTOP */}
@@ -56,21 +50,23 @@ export default function Navbar() {
             <a
               key={link.name}
               href={link.href}
-              className="text-xs font-mono uppercase tracking-widest text-gray-600 hover:text-[#ff2a2a] transition-colors"
+              className="text-xs font-mono uppercase tracking-widest text-gray-700 hover:text-[#ff2a2a] transition-colors font-medium"
             >
               {link.name}
             </a>
           ))}
         </div>
 
-        {/* BOTÓN CTA */}
+        {/* BOTÓN WHATSAPP */}
         <div className="hidden md:block">
           <a
-            href="#contacto"
-            className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-5 py-2.5 rounded-full hover:bg-red-600 transition-all duration-300 shadow-md shadow-red-500/15 text-xs tracking-wider uppercase"
+            href="https://wa.me/4481204807"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-5 py-2 rounded-full hover:bg-red-600 transition-all duration-300 shadow-md shadow-red-500/15 text-xs tracking-wider uppercase"
           >
-            <span>Iniciar Proyecto</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Contacto</span>
           </a>
         </div>
 
@@ -84,26 +80,27 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* MENÚ MÓVIL DESPLEGABLE */}
+      {/* MENÚ MÓVIL */}
       {mobileMenuOpen && (
-        <div className="absolute top-20 left-6 right-6 bg-white/90 backdrop-blur-2xl rounded-3xl p-6 border border-white shadow-2xl flex flex-col gap-4 md:hidden z-50">
+        <div className="absolute top-20 left-6 right-6 bg-white/95 backdrop-blur-2xl rounded-3xl p-6 border border-white shadow-2xl flex flex-col gap-4 md:hidden z-50">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-mono uppercase tracking-widest text-gray-800 hover:text-[#ff2a2a] py-2 border-b border-gray-100"
+              className="text-sm font-mono uppercase tracking-widest text-gray-800 hover:text-[#ff2a2a] py-2 border-b border-gray-100 font-medium"
             >
               {link.name}
             </a>
           ))}
           <a
-            href="#contacto"
-            onClick={() => setMobileMenuOpen(false)}
+            href="https://wa.me/4481204807"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#ff2a2a] text-white font-semibold py-3 rounded-full text-xs tracking-wider uppercase shadow-md shadow-red-500/20"
           >
-            <span>Iniciar Proyecto</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <MessageSquare className="w-4 h-4" />
+            <span>Contacto WhatsApp</span>
           </a>
         </div>
       )}
