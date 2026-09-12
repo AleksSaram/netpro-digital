@@ -29,18 +29,18 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-6 transition-all duration-300">
       <nav 
-        className={`w-full max-w-7xl mx-auto flex items-center justify-between px-6 py-2.5 transition-all duration-500 rounded-full border overflow-visible ${
+        className={`w-full max-w-7xl mx-auto flex items-center justify-between px-6 py-3 transition-all duration-500 rounded-full border overflow-visible ${
           scrolled 
             ? 'bg-white/85 backdrop-blur-2xl border-white/95 shadow-[0_10px_30px_rgb(0,0,0,0.06)]' 
             : 'bg-white/60 backdrop-blur-xl border-white/80 shadow-xs'
         }`}
       >
-        {/* LOGOTIPO GRANDE Y LIBRE QUE NO AFECTA LA ALTURA DEL MENÚ */}
-        <a href="#" className="flex items-center group cursor-pointer relative py-1">
+        {/* LOGOTIPO AJUSTADO A UN TAMAÑO IDEAL Y BALANCEADO */}
+        <a href="#" className="flex items-center group cursor-pointer relative py-0.5">
           <img
-            src="/LOGONETPRONUEVONEGATIVO.PNG"
+            src="/logo-netpro.png"
             alt="NetPro Digital Studio"
-            className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            className="h-10 sm:h-13 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
           />
         </a>
 
@@ -63,7 +63,7 @@ export default function Navbar() {
             href="https://wa.me/4481204807"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-5 py-2 rounded-full hover:bg-red-600 transition-all duration-300 shadow-md shadow-red-500/15 text-xs tracking-wider uppercase"
+            className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-5 py-2.5 rounded-full hover:bg-red-600 transition-all duration-300 shadow-md shadow-red-500/15 text-xs tracking-wider uppercase"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Contacto</span>
