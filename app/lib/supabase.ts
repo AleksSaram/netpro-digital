@@ -5,7 +5,6 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Tipos para el cliente
 export type CategoriaCliente = 'Medicina' | 'Educación' | 'Marcas Personales' | 'Multinivel' | 'Belleza' | 'Eventos'
 export type DemoTipo = 'web' | 'video' | 'feed' | 'branding'
 
@@ -20,5 +19,9 @@ export interface Client {
   demo_url: string
   demo_thumb?: string
   metrica?: string
+  instagram_url?: string
+  facebook_url?: string
+  website_url?: string
+  tiktok_url?: string
   created_at?: string
 }
