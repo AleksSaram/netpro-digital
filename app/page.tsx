@@ -6,6 +6,7 @@ import Tilt from "react-parallax-tilt";
 import InteractiveCanvas from "@/app/components/InteractiveCanvas";
 import FluidBackground from "@/app/components/FluidBackground";
 import Navbar from "@/app/components/Navbar";
+import NuestrosClientes from "@/app/components/NuestrosClientes";
 import { ArrowUpRight, CheckCircle2, Send, Terminal, Calendar, MessageSquare, TrendingUp, Video, Share2, Compass, Code2, Target, Clock, Check, ChevronRight } from "lucide-react";
 
 const servicesData = [
@@ -361,121 +362,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= NUESTRAS ALIANZAS INTERACTIVAS ================= */}
-      <section id="alianzas" className="py-28 px-6 relative z-10 border-t border-white/40 bg-white/20 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div>
-              <span className="text-xs font-mono tracking-widest uppercase text-[#ff2a2a] bg-red-50/80 backdrop-blur-xs px-3 py-1 rounded-full border border-red-100 font-semibold">
-                02 // Alianzas & Clientes
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 text-gray-900">
-                Nuestras Alianzas
-              </h2>
-            </div>
-            <p className="text-gray-600 max-w-md text-sm leading-relaxed">
-              Haz clic en cualquier marca para explorar el impacto estratégico, la imagen de referencia y los resultados entregados.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Lista de Marcas (Columna 1) */}
-            <div className="lg:col-span-1 flex flex-col gap-2.5 max-h-[620px] overflow-y-auto pr-2">
-              {realPartners.map((partner) => {
-                const isSelected = expandedPartner === partner.id;
-                return (
-                  <button
-                    key={partner.id}
-                    onClick={() => setExpandedPartner(partner.id)}
-                    className={`w-full text-left px-5 py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-between border cursor-pointer ${
-                      isSelected
-                        ? 'bg-gray-900 text-white border-gray-900 shadow-xl shadow-gray-900/10 scale-[1.01]'
-                        : 'bg-white/60 backdrop-blur-md text-gray-800 border-white/80 hover:bg-white hover:border-red-200'
-                    }`}
-                  >
-                    <div>
-                      <span className={`text-[10px] font-mono uppercase tracking-widest block mb-0.5 ${isSelected ? 'text-red-400' : 'text-gray-500'}`}>
-                        {partner.category}
-                      </span>
-                      <span className="font-bold text-sm tracking-tight">
-                        // {partner.name}
-                      </span>
-                    </div>
-                    <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isSelected ? 'rotate-90 text-[#ff2a2a]' : 'text-gray-400'}`} />
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Panel de Detalle con Imagen (Columnas 2 y 3) */}
-            <div className="lg:col-span-2">
-              <AnimatePresence mode="wait">
-                {realPartners.map((partner) => {
-                  if (partner.id !== expandedPartner) return null;
-                  return (
-                    <motion.div
-                      key={partner.id}
-                      initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                      transition={{ duration: 0.4 }}
-                      className="bg-white/85 backdrop-blur-2xl rounded-3xl p-6 sm:p-10 border border-white shadow-[0_20px_50px_rgb(0,0,0,0.06)] relative overflow-hidden flex flex-col justify-between h-full min-h-[500px]"
-                    >
-                      <div>
-                        {/* Imagen de referencia del proyecto */}
-                        <div className="relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden mb-6 shadow-inner bg-gray-100">
-                          <img 
-                            src={partner.image} 
-                            alt={partner.name} 
-                            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                          
-                          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/50 shadow-xs">
-                            <span className="text-[10px] font-mono font-bold text-[#ff2a2a] uppercase tracking-wider">
-                              {partner.category}
-                            </span>
-                          </div>
-
-                          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
-                            <span className="text-xs font-mono font-medium tracking-wide bg-black/40 backdrop-blur-md px-3 py-1 rounded-lg">
-                              {partner.metrics}
-                            </span>
-                          </div>
-                        </div>
-
-                        <h3 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 tracking-tight">
-                          {partner.name}
-                        </h3>
-                        <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
-                          {partner.description}
-                        </p>
-                      </div>
-
-                      <div className="pt-5 border-t border-gray-100 flex items-center justify-between">
-                        <span className="text-xs font-mono text-gray-400">NetPro Digital Studio Partnership</span>
-                        <a
-                          href={partner.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-6 py-3 rounded-full hover:bg-red-600 transition-all duration-300 text-xs tracking-wider uppercase shadow-md shadow-red-500/20"
-                        >
-                          <span>Visitar Proyecto</span>
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
+      {/* ================= NUESTROS CLIENTES - NUEVO SISTEMA POR CATEGORÍAS ================= */}
+      <NuestrosClientes />
 
       {/* ================= CONTACTO STUDIO (CONTÁCTANOS Y EMPIEZA A CRECER) ================= */}
       <section id="contacto" className="py-28 px-6 relative z-10 border-t border-white/40 bg-transparent">

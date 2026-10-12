@@ -22,7 +22,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: '01 // Soluciones', href: '#servicios' },
-    { name: '02 // Alianzas', href: '#alianzas' },
+    { name: '02 // Clientes', href: '#clientes' },
     { name: '03 // Contacto', href: '#contacto' },
   ];
 
