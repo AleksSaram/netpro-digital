@@ -210,7 +210,7 @@ export default function Home() {
     if (!selectedDate || !selectedSlot || !clientName) return;
     
     const message = encodeURIComponent(`Hola, soy *${clientName}*. Quiero agendar una sesión estratégica de 45 minutos para el día *${selectedDate}* en el horario de *${selectedSlot}*. Quedo atento a la confirmación.`);
-    window.open(`https://wa.me/4481204807?text=${message}`, '_blank');
+    window.open(`https://wa.me/5627000847?text=${message}`, '_blank');
     setIsBookingOpen(false);
   };
 
@@ -266,7 +266,7 @@ export default function Home() {
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4"
             >
               <a
-                href="https://wa.me/4481204807"
+                href="https://wa.me/5627000847"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2.5 bg-[#ff2a2a] text-white font-semibold px-9 py-4 rounded-full hover:bg-red-600 transition-all duration-300 shadow-xl shadow-red-500/20 text-xs tracking-widest uppercase"

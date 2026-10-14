@@ -60,7 +60,7 @@ export default function Navbar() {
         {/* BOTÓN WHATSAPP */}
         <div className="hidden md:block">
           <a
-            href="https://wa.me/4481204807"
+            href="https://wa.me/5627000847"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-5 py-2.5 rounded-full hover:bg-red-600 transition-all duration-300 shadow-md shadow-red-500/15 text-xs tracking-wider uppercase"
@@ -94,7 +94,7 @@ export default function Navbar() {
             </a>
           ))}
           <a
-            href="https://wa.me/4481204807"
+            href="https://wa.me/5627000847"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#ff2a2a] text-white font-semibold py-3 rounded-full text-xs tracking-wider uppercase shadow-md shadow-red-500/20"
