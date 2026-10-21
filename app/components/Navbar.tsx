@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, MessageSquare } from 'lucide-react';
+import { Menu, X, MessageSquare, GraduationCap } from 'lucide-react';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -35,7 +35,7 @@ export default function Navbar() {
             : 'bg-white/60 backdrop-blur-xl border-white/80 shadow-xs'
         }`}
       >
-        {/* LOGOTIPO AJUSTADO A UN TAMAÑO IDEAL Y BALANCEADO */}
+        {/* LOGOTIPO */}
         <a href="#" className="flex items-center group cursor-pointer relative py-0.5">
           <img
             src="/logo-netpro.png"
@@ -57,13 +57,20 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* BOTÓN WHATSAPP */}
-        <div className="hidden md:block">
+        {/* BOTONES DESKTOP - PORTAL CURSOS + WHATSAPP */}
+        <div className="hidden md:flex items-center gap-3">
+          <a
+            href="/cursos"
+            className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-5 py-2.5 rounded-full hover:bg-red-600 transition-all duration-300 shadow-md shadow-red-500/15 text-xs tracking-wider uppercase"
+          >
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Portal Cursos</span>
+          </a>
           <a
             href="https://wa.me/5627000847"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#ff2a2a] text-white font-semibold px-5 py-2.5 rounded-full hover:bg-red-600 transition-all duration-300 shadow-md shadow-red-500/15 text-xs tracking-wider uppercase"
+            className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold px-5 py-2.5 rounded-full hover:bg-black transition-all duration-300 shadow-md text-xs tracking-wider uppercase"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Contacto</span>
@@ -94,10 +101,18 @@ export default function Navbar() {
             </a>
           ))}
           <a
+            href="/cursos"
+            onClick={() => setMobileMenuOpen(false)}
+            className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#ff2a2a] text-white font-semibold py-3 rounded-full text-xs tracking-wider uppercase shadow-md shadow-red-500/20"
+          >
+            <GraduationCap className="w-4 h-4" />
+            <span>Portal Cursos</span>
+          </a>
+          <a
             href="https://wa.me/5627000847"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#ff2a2a] text-white font-semibold py-3 rounded-full text-xs tracking-wider uppercase shadow-md shadow-red-500/20"
+            className="w-full inline-flex items-center justify-center gap-2 bg-gray-900 text-white font-semibold py-3 rounded-full text-xs tracking-wider uppercase shadow-md"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Contacto WhatsApp</span>
