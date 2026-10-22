@@ -122,7 +122,7 @@ export default function NuestrosClientesV6() {
         </div>
       </section>
 
-      {/* MODAL CLIENTE - VERSION MOVIL CON SCROLL COMPLETO */}
+      {/* MODAL - MÓVIL COMPACTO: foto pequeña + servicios ocupan 80% */}
       <AnimatePresence>
         {selected && (
           <motion.div 
@@ -132,9 +132,7 @@ export default function NuestrosClientesV6() {
             className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex flex-col md:block md:overflow-y-auto"
             onClick={()=>setSelected(null)}
           >
-            {/* WRAPPER: en móvil es full height scrollable, en desktop centrado */}
             <div className="flex-1 flex flex-col md:min-h-full md:items-center md:justify-center md:p-6 overflow-y-auto md:overflow-visible">
-              {/* Indicador de arrastre móvil */}
               <div className="md:hidden w-full flex justify-center pt-3 pb-2 bg-white rounded-t-[2rem] sticky top-0 z-10 shrink-0"><div className="w-10 h-1.5 bg-gray-300 rounded-full"/></div>
               
               <motion.div 
@@ -142,61 +140,69 @@ export default function NuestrosClientesV6() {
                 animate={{y: 0}} 
                 exit={{y: '100%'}} 
                 transition={{type:'spring', damping:30, stiffness:300}}
-                className="bg-white w-full md:max-w-6xl md:rounded-[2rem] rounded-t-[2rem] rounded-b-none md:rounded-b-[2rem] shadow-2xl flex flex-col lg:flex-row overflow-hidden md:overflow-hidden max-h-[92dvh] md:max-h-[88vh] mt-auto md:mt-8 mb-0 md:mb-8" 
+                className="bg-white w-full md:max-w-6xl md:rounded-[2rem] rounded-t-[2rem] rounded-b-none md:rounded-b-[2rem] shadow-2xl flex flex-col lg:flex-row overflow-hidden max-h-[94dvh] md:max-h-[88vh] mt-auto md:mt-8 mb-0 md:mb-8" 
                 onClick={e=>e.stopPropagation()}
               >
-                {/* IZQUIERDA - SCROLLEABLE EN DESKTOP, FIJO EN MOVIL CON SCROLL PADRE */}
-                <div className="lg:w-[36%] bg-[#fcf8f5] p-6 md:p-7 flex flex-col md:overflow-y-auto shrink-0 border-b lg:border-b-0 lg:border-r border-white">
-                  <div className="relative aspect-[3/4] max-h-[380px] md:max-h-none rounded-2xl overflow-hidden mb-5 shrink-0">
-                    <img src={selected.imagen_url} className="w-full h-full object-cover object-top"/>
-                    <button onClick={()=>setSelected(null)} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center"><X className="w-4 h-4"/></button>
-                  </div>
-                  <h3 className="text-2xl font-extrabold leading-tight">{selected.nombre}</h3>
-                  <p className="text-xs font-mono uppercase text-[#ff2a2a] mt-1">{selected.categoria} • {selected.metrica}</p>
-                  <p className="text-sm text-gray-600 mt-4 leading-relaxed">{selected.descripcion}</p>
-                  
-                  <div className="mt-6">
-                    <p className="text-[11px] font-mono uppercase tracking-widest text-gray-500 mb-3">Redes del cliente</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-5 h-5"/></a>}
-                      {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-5 h-5"/></a>}
-                      {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-5 h-5"/></a>}
-                      {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-5 h-5"/></a>}
-                      {selected.website_url && <a href={selected.website_url} target="_blank" className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-5 h-5"/></a>}
+                {/* IZQUIERDA - COMPACTA EN MÓVIL */}
+                <div className="lg:w-[36%] bg-[#fcf8f5] flex flex-col md:overflow-y-auto shrink-0 border-b lg:border-b-0 lg:border-r border-white">
+                  {/* HEADER COMPACTO MÓVIL: foto pequeña horizontal */}
+                  <div className="flex md:flex-col gap-4 p-4 md:p-7">
+                    {/* Foto: en móvil pequeña 80x80 redonda, en desktop grande 3:4 */}
+                    <div className="relative w-20 h-20 md:w-full md:h-auto md:aspect-[3/4] rounded-full md:rounded-2xl overflow-hidden shrink-0">
+                      <img src={selected.imagen_url} className="w-full h-full object-cover object-top"/>
                     </div>
+                    <div className="flex-1 md:mt-0 min-w-0">
+                      <h3 className="text-lg md:text-2xl font-extrabold leading-tight truncate md:whitespace-normal">{selected.nombre}</h3>
+                      <p className="text-[11px] md:text-xs font-mono uppercase text-[#ff2a2a] mt-1 truncate">{selected.categoria} • {selected.metrica}</p>
+                      {/* Descripción corta en móvil, completa en desktop */}
+                      <p className="text-[13px] md:text-sm text-gray-600 mt-2 md:mt-4 leading-relaxed line-clamp-2 md:line-clamp-none">{selected.descripcion}</p>
+                      <button onClick={()=>setSelected(null)} className="absolute top-4 right-4 md:top-3 md:right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur shadow flex items-center justify-center md:hidden"><X className="w-4 h-4"/></button>
+                    </div>
+                  </div>
+                  
+                  {/* Redes - compactas en móvil */}
+                  <div className="px-4 md:px-7 pb-4 md:pb-7">
+                    <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-widest text-gray-500 mb-2 md:mb-3">Redes del cliente</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                      {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                      {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                      {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                      {selected.website_url && <a href={selected.website_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                    </div>
+                    <button onClick={()=>setSelected(null)} className="hidden lg:flex mt-6 w-full border border-gray-200 bg-white rounded-full py-3 text-xs font-mono uppercase justify-center gap-2 hover:bg-gray-50"><X className="w-4 h-4"/> Cerrar</button>
                   </div>
                 </div>
 
-                {/* DERECHA - AHORA CON SCROLL PROPIO EN MOVIL Y DESKTOP */}
-                <div className="lg:w-[64%] p-6 md:p-7 bg-white flex flex-col overflow-y-auto flex-1 min-h-[50vh]">
-                  <div className="flex justify-between items-center mb-5 shrink-0"><h4 className="font-bold text-sm uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length} trabajos</span></div>
+                {/* DERECHA - OCUPA 75% EN MÓVIL */}
+                <div className="lg:w-[64%] p-4 md:p-7 bg-white flex flex-col overflow-y-auto flex-1 min-h-[60vh] md:min-h-0">
+                  <div className="flex justify-between items-center mb-4 shrink-0"><h4 className="font-bold text-[13px] md:text-sm uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length} trabajos</span></div>
 
-                  <div className="flex flex-wrap gap-2 mb-6 shrink-0">
+                  <div className="flex flex-wrap gap-2 mb-5 shrink-0">
                     {[...new Set(getItemsForClient(selected.id).map((i:ServiceItem)=>i.servicio_tipo))].map((tipo:string)=>(
-                      <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-widest border transition-all ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a] shadow' : 'bg-white border-gray-200 hover:bg-gray-50'}`}>{tipo}</button>
+                      <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-[11px] md:text-xs font-mono uppercase tracking-widest border transition-all ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a] shadow' : 'bg-white border-gray-200 hover:bg-gray-50'}`}>{tipo}</button>
                     ))}
                   </div>
 
-                  <div className="space-y-6 pb-8">
+                  <div className="space-y-4 md:space-y-6 pb-6">
                     {filteredForActive.map((item:ServiceItem)=>(
-                      <div key={item.id} className="group rounded-[1.5rem] overflow-hidden border border-gray-100 bg-[#fcf8f5] shadow-sm hover:shadow-md transition-all cursor-zoom-in" onClick={()=>openLightbox(item)}>
-                        <div className="relative bg-white p-2">
-                          <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase shadow-sm border border-white">{item.servicio_tipo}</div>
-                          <div className="absolute top-4 right-4 z-10 bg-black/60 backdrop-blur text-white px-2.5 py-1 rounded-full text-[10px] font-mono flex items-center gap-1"><Maximize2 className="w-3 h-3"/> Ampliar</div>
-                          <img src={item.imagen_url} alt={item.servicio_tipo} className="w-full h-auto max-h-[70vh] md:max-h-[600px] object-contain rounded-xl bg-white"/>
+                      <div key={item.id} className="group rounded-[1.25rem] md:rounded-[1.5rem] overflow-hidden border border-gray-100 bg-[#fcf8f5] shadow-sm hover:shadow-md transition-all cursor-zoom-in" onClick={()=>openLightbox(item)}>
+                        <div className="relative bg-white p-1.5 md:p-2">
+                          <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-mono font-bold uppercase shadow-sm border border-white">{item.servicio_tipo}</div>
+                          <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur text-white px-2 py-1 rounded-full text-[9px] md:text-[10px] font-mono flex items-center gap-1"><Maximize2 className="w-3 h-3"/> Ampliar</div>
+                          <img src={item.imagen_url} alt={item.servicio_tipo} className="w-full h-auto max-h-[75dvh] md:max-h-[600px] object-contain rounded-xl bg-white"/>
                         </div>
-                        <div className="p-4 flex justify-between items-center bg-white">
-                          <div><p className="text-sm font-medium text-gray-900">{item.descripcion || 'Campaña '+item.servicio_tipo}</p><p className="text-[11px] font-mono text-gray-500 mt-0.5">{item.servicio_tipo} • Toca para ver completo</p></div>
-                          {item.demo_url && <a href={item.demo_url} target="_blank" onClick={e=>e.stopPropagation()} className="text-[11px] font-mono uppercase text-[#ff2a2a] flex items-center gap-1 font-semibold border border-red-100 bg-red-50 px-3 py-1.5 rounded-full">Ver <ExternalLink className="w-3 h-3"/></a>}
+                        <div className="p-3 md:p-4 flex justify-between items-center bg-white">
+                          <div><p className="text-[13px] md:text-sm font-medium text-gray-900 line-clamp-1">{item.descripcion || 'Campaña '+item.servicio_tipo}</p><p className="text-[10px] md:text-[11px] font-mono text-gray-500 mt-0.5">{item.servicio_tipo}</p></div>
+                          {item.demo_url && <a href={item.demo_url} target="_blank" onClick={e=>e.stopPropagation()} className="text-[10px] md:text-[11px] font-mono uppercase text-[#ff2a2a] flex items-center gap-1 font-semibold border border-red-100 bg-red-50 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full">Ver <ExternalLink className="w-3 h-3"/></a>}
                         </div>
                       </div>
                     ))}
                     {filteredForActive.length===0 && <div className="bg-gray-50 border border-dashed rounded-2xl p-10 text-center"><p className="text-xs font-mono text-gray-500">No hay imágenes para {activeService}</p></div>}
                   </div>
 
-                  {/* Botón cerrar extra en móvil al final */}
                   <button onClick={()=>setSelected(null)} className="lg:hidden mt-2 w-full border border-gray-200 bg-white rounded-full py-4 text-xs font-mono uppercase flex items-center justify-center gap-2 hover:bg-gray-50 shrink-0"><X className="w-4 h-4"/> Cerrar</button>
-                  <div className="lg:hidden h-6 shrink-0"></div>
+                  <div className="lg:hidden h-8 shrink-0"></div>
                 </div>
               </motion.div>
             </div>
@@ -231,4 +237,3 @@ export default function NuestrosClientesV6() {
     </>
   );
 }
-
