@@ -33,8 +33,6 @@ export default function NuestrosClientes() {
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<ServiceItem | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  
-  // Para animación móvil sin desmontar
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => { fetchAll(); }, []);
@@ -54,16 +52,19 @@ export default function NuestrosClientes() {
     setSelected(client);
     const items = getItemsForClient(client.id);
     setActiveService(items.length > 0 ? items[0].servicio_tipo : null);
-    // Abrir con delay para que entre la animación
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => setMobileOpen(true));
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => setMobileOpen(true)));
   };
 
-  const handleClose = () => {
+  const handleCloseMobile = () => {
+    // FIX SAFARI: No borramos las imágenes, solo deslizamos el sheet abajo
+    // Antes hacíamos setSelected(null) y Safari tenía que liberar 3 imágenes de 2-3MB de golpe = 5-7s freeze
     setMobileOpen(false);
-    // No borramos selected al instante, esperamos a que baje el sheet (300ms)
-    setTimeout(() => setSelected(null), 300);
+    // No hacemos setSelected(null) en móvil, lo dejamos en memoria oculto
+  };
+
+  const handleCloseDesktop = () => {
+    setSelected(null);
+    setMobileOpen(false);
   };
 
   const filteredForActive = selected ? getItemsForClient(selected.id).filter((i:ServiceItem)=>!activeService || i.servicio_tipo===activeService) : [];
@@ -84,13 +85,11 @@ export default function NuestrosClientes() {
             </div>
             <p className="text-gray-600 max-w-md text-sm leading-relaxed">Cada servicio con demo visual completa.</p>
           </div>
-
           <div className="flex flex-wrap gap-2 mb-10">
             {categorias.map(cat => (
               <button key={cat} onClick={() => setActiveCat(cat)} className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider border ${activeCat===cat ? 'bg-gray-900 text-white border-gray-900' : 'bg-white/60 border-white/80 hover:bg-white'}`}>{cat}</button>
             ))}
           </div>
-
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1,2,3].map(i=><div key={i} className="aspect-[3/4] bg-white/60 rounded-3xl animate-pulse"/> )}</div>
           ) : (
@@ -119,7 +118,7 @@ export default function NuestrosClientes() {
         </div>
       </section>
 
-      {/* ===================== WEB - GLASS ORIGINAL ===================== */}
+      {/* WEB */}
       <div className="hidden md:block">
         {selected && (
           <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md overflow-y-auto p-6 flex items-center justify-center">
@@ -127,21 +126,19 @@ export default function NuestrosClientes() {
               <div className="w-[36%] bg-[#fcf8f5] p-7 flex flex-col overflow-y-auto border-r border-white">
                 <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-5">
                   <img src={selected.imagen_url} className="w-full h-full object-cover object-top"/>
-                  <button onClick={handleClose} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur text-white flex items-center justify-center"><X className="w-4 h-4"/></button>
+                  <button onClick={handleCloseDesktop} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur text-white flex items-center justify-center"><X className="w-4 h-4"/></button>
                 </div>
                 <h3 className="text-2xl font-extrabold">{selected.nombre}</h3>
                 <p className="text-xs font-mono uppercase text-[#ff2a2a] mt-1">{selected.categoria} • {selected.metrica}</p>
                 <p className="text-sm text-gray-600 mt-4">{selected.descripcion}</p>
-                <div className="mt-6">
-                  <div className="flex gap-2 flex-wrap">
-                    {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-5 h-5"/></a>}
-                    {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-5 h-5"/></a>}
-                    {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-5 h-5"/></a>}
-                    {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-5 h-5"/></a>}
-                    {selected.website_url && <a href={selected.website_url} target="_blank" className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-5 h-5"/></a>}
-                  </div>
+                <div className="mt-6 flex gap-2 flex-wrap">
+                  {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-5 h-5"/></a>}
+                  {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-5 h-5"/></a>}
+                  {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-5 h-5"/></a>}
+                  {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-5 h-5"/></a>}
+                  {selected.website_url && <a href={selected.website_url} target="_blank" className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-5 h-5"/></a>}
                 </div>
-                <button onClick={handleClose} className="mt-auto w-full border border-gray-200 bg-white rounded-full py-3 text-xs font-mono uppercase flex justify-center gap-2"><X className="w-4 h-4"/> Cerrar</button>
+                <button onClick={handleCloseDesktop} className="mt-auto w-full border border-gray-200 bg-white rounded-full py-3 text-xs font-mono uppercase flex justify-center gap-2"><X className="w-4 h-4"/> Cerrar</button>
               </div>
               <div className="w-[64%] p-7 overflow-y-auto bg-white">
                 <div className="flex justify-between items-center mb-5"><h4 className="font-bold text-sm uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length} trabajos</span></div>
@@ -154,7 +151,6 @@ export default function NuestrosClientes() {
                   {filteredForActive.map((item:ServiceItem)=>(
                     <div key={item.id} className="rounded-[1.5rem] overflow-hidden border border-gray-100 bg-[#fcf8f5] cursor-zoom-in" onClick={()=>openLightbox(item)}>
                       <div className="relative bg-white p-2"><img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto max-h-[600px] object-contain rounded-xl bg-white"/></div>
-                      <div className="p-4 flex justify-between items-center bg-white"><p className="text-sm font-medium">{item.descripcion}</p></div>
                     </div>
                   ))}
                 </div>
@@ -164,34 +160,18 @@ export default function NuestrosClientes() {
         )}
       </div>
 
-      {/* ===================== MÓVIL - BOTTOM SHEET SIN DESMONTAR ===================== */}
+      {/* MÓVIL - FIX SAFARI NO GC */}
       <div className="block md:hidden">
-        {/* Render siempre si hay selected, pero animamos con transform */}
         {selected && (
           <div className="fixed inset-0 z-[100] flex flex-col justify-end">
-            {/* Backdrop - fade */}
-            <div 
-              className={`absolute inset-0 bg-black transition-opacity duration-300 ${mobileOpen ? 'bg-black/80 opacity-100' : 'opacity-0 pointer-events-none'}`}
-              onClick={handleClose}
-            />
-            
-            {/* Sheet - slide up/down con transform, no se desmontan las imágenes al cerrar */}
+            <div className={`absolute inset-0 bg-black transition-opacity duration-300 ${mobileOpen ? 'bg-black/80 opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={handleCloseMobile}/>
             <div className={`relative bg-white w-full rounded-t-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[92dvh] transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform ${mobileOpen ? 'translate-y-0' : 'translate-y-full'}`}>
-              {/* Handle único */}
               <div className="w-full flex justify-center pt-3 pb-2 shrink-0"><div className="w-10 h-1.5 bg-gray-300 rounded-full"/></div>
-              
-              {/* Header compacto */}
               <div className="bg-[#fcf8f5] px-4 pb-4 flex flex-col shrink-0">
                 <div className="flex gap-4">
-                  <div className="w-20 h-20 rounded-full overflow-hidden shrink-0 bg-gray-100">
-                    <img src={selected.imagen_url} className="w-full h-full object-cover object-top" loading="eager"/>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-[17px] font-extrabold leading-tight">{selected.nombre}</h3>
-                    <p className="text-[11px] font-mono uppercase text-[#ff2a2a] mt-1 truncate">{selected.categoria} • {selected.metrica}</p>
-                    <p className="text-[13px] text-gray-600 mt-1.5 line-clamp-2 leading-snug">{selected.descripcion}</p>
-                  </div>
-                  <button onClick={handleClose} className="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center shrink-0 self-start"><X className="w-4 h-4"/></button>
+                  <div className="w-20 h-20 rounded-full overflow-hidden shrink-0 bg-gray-100"><img src={selected.imagen_url} className="w-full h-full object-cover object-top" loading="eager"/></div>
+                  <div className="flex-1 min-w-0"><h3 className="text-[17px] font-extrabold leading-tight">{selected.nombre}</h3><p className="text-[11px] font-mono uppercase text-[#ff2a2a] mt-1 truncate">{selected.categoria} • {selected.metrica}</p><p className="text-[13px] text-gray-600 mt-1.5 line-clamp-2">{selected.descripcion}</p></div>
+                  <button onClick={handleCloseMobile} className="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center shrink-0 self-start"><X className="w-4 h-4"/></button>
                 </div>
                 <div className="flex gap-2 mt-3 flex-wrap">
                   {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-4 h-4"/></a>}
@@ -201,8 +181,6 @@ export default function NuestrosClientes() {
                   {selected.website_url && <a href={selected.website_url} target="_blank" className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-4 h-4"/></a>}
                 </div>
               </div>
-
-              {/* Contenido scrolleable - sin rounded extra, sin doble borde */}
               <div className="flex-1 overflow-y-auto overscroll-contain p-4 bg-white" style={{ WebkitOverflowScrolling: 'touch' } as any}>
                 <div className="flex justify-between items-center mb-4"><h4 className="font-bold text-[13px] uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length}</span></div>
                 <div className="flex flex-wrap gap-2 mb-5">
@@ -213,18 +191,13 @@ export default function NuestrosClientes() {
                 <div className="space-y-4 pb-28">
                   {filteredForActive.map((item:ServiceItem)=>(
                     <div key={item.id} className="rounded-[1.25rem] overflow-hidden border border-gray-100 bg-[#fcf8f5]" onClick={()=>openLightbox(item)}>
-                      <div className="relative bg-white p-1.5">
-                        <div className="absolute top-3 left-3 bg-white px-2.5 py-1 rounded-full text-[9px] font-mono font-bold uppercase shadow-sm">{item.servicio_tipo}</div>
-                        <img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto object-contain rounded-xl bg-white" style={{ maxHeight: '65vh' }}/>
-                      </div>
+                      <div className="relative bg-white p-1.5"><div className="absolute top-3 left-3 bg-white px-2.5 py-1 rounded-full text-[9px] font-mono font-bold uppercase shadow-sm">{item.servicio_tipo}</div><img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto object-contain rounded-xl bg-white" style={{ maxHeight: '65vh' }}/></div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Botón cerrar fijo */}
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-white/0 pt-8">
-                <button onClick={handleClose} className="w-full bg-gray-900 text-white rounded-full py-4 text-xs font-mono uppercase flex items-center justify-center gap-2 shadow-2xl active:scale-[0.98] transition-transform"><X className="w-4 h-4"/> Cerrar</button>
+                <button onClick={handleCloseMobile} className="w-full bg-gray-900 text-white rounded-full py-4 text-xs font-mono uppercase flex items-center justify-center gap-2 shadow-2xl active:scale-[0.98] transition-transform"><X className="w-4 h-4"/> Cerrar</button>
                 <div className="h-[env(safe-area-inset-bottom)]"></div>
               </div>
             </div>
@@ -232,7 +205,6 @@ export default function NuestrosClientes() {
         )}
       </div>
 
-      {/* Lightbox */}
       {lightbox && (
         <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4" onClick={()=>setLightbox(null)}>
           <button onClick={()=>setLightbox(null)} className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center"><X className="w-5 h-5"/></button>
