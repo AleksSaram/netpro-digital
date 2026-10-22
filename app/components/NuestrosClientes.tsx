@@ -33,6 +33,9 @@ export default function NuestrosClientes() {
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<ServiceItem | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  
+  // Para animación móvil sin desmontar
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => { fetchAll(); }, []);
   const fetchAll = async () => {
@@ -46,11 +49,23 @@ export default function NuestrosClientes() {
 
   const getItemsForClient = (clientId: string) => serviceItems.filter(i => i.client_id === clientId);
   const filtered = activeCat === 'Todos' ? clients : clients.filter((c:any)=>c.categoria===activeCat);
+  
   const handleOpen = (client:any) => {
     setSelected(client);
     const items = getItemsForClient(client.id);
     setActiveService(items.length > 0 ? items[0].servicio_tipo : null);
+    // Abrir con delay para que entre la animación
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setMobileOpen(true));
+    });
   };
+
+  const handleClose = () => {
+    setMobileOpen(false);
+    // No borramos selected al instante, esperamos a que baje el sheet (300ms)
+    setTimeout(() => setSelected(null), 300);
+  };
+
   const filteredForActive = selected ? getItemsForClient(selected.id).filter((i:ServiceItem)=>!activeService || i.servicio_tipo===activeService) : [];
   const openLightbox = (item: ServiceItem) => {
     const idx = filteredForActive.findIndex((i:ServiceItem)=>i.id===item.id);
@@ -104,7 +119,7 @@ export default function NuestrosClientes() {
         </div>
       </section>
 
-      {/* ===================== VERSIÓN WEB - SE OCULTA EN MÓVIL ===================== */}
+      {/* ===================== WEB - GLASS ORIGINAL ===================== */}
       <div className="hidden md:block">
         {selected && (
           <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md overflow-y-auto p-6 flex items-center justify-center">
@@ -112,13 +127,12 @@ export default function NuestrosClientes() {
               <div className="w-[36%] bg-[#fcf8f5] p-7 flex flex-col overflow-y-auto border-r border-white">
                 <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-5">
                   <img src={selected.imagen_url} className="w-full h-full object-cover object-top"/>
-                  <button onClick={()=>setSelected(null)} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur text-white flex items-center justify-center hover:bg-black"><X className="w-4 h-4"/></button>
+                  <button onClick={handleClose} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur text-white flex items-center justify-center"><X className="w-4 h-4"/></button>
                 </div>
                 <h3 className="text-2xl font-extrabold">{selected.nombre}</h3>
                 <p className="text-xs font-mono uppercase text-[#ff2a2a] mt-1">{selected.categoria} • {selected.metrica}</p>
-                <p className="text-sm text-gray-600 mt-4 leading-relaxed">{selected.descripcion}</p>
+                <p className="text-sm text-gray-600 mt-4">{selected.descripcion}</p>
                 <div className="mt-6">
-                  <p className="text-[11px] font-mono uppercase tracking-widest text-gray-500 mb-3">Redes del cliente</p>
                   <div className="flex gap-2 flex-wrap">
                     {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-5 h-5"/></a>}
                     {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-5 h-5"/></a>}
@@ -127,27 +141,20 @@ export default function NuestrosClientes() {
                     {selected.website_url && <a href={selected.website_url} target="_blank" className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-5 h-5"/></a>}
                   </div>
                 </div>
-                <button onClick={()=>setSelected(null)} className="mt-auto w-full border border-gray-200 bg-white rounded-full py-3 text-xs font-mono uppercase flex justify-center gap-2 hover:bg-gray-50"><X className="w-4 h-4"/> Cerrar</button>
+                <button onClick={handleClose} className="mt-auto w-full border border-gray-200 bg-white rounded-full py-3 text-xs font-mono uppercase flex justify-center gap-2"><X className="w-4 h-4"/> Cerrar</button>
               </div>
               <div className="w-[64%] p-7 overflow-y-auto bg-white">
                 <div className="flex justify-between items-center mb-5"><h4 className="font-bold text-sm uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length} trabajos</span></div>
                 <div className="flex flex-wrap gap-2 mb-6">
                   {[...new Set(getItemsForClient(selected.id).map((i:ServiceItem)=>i.servicio_tipo))].map((tipo:string)=>(
-                    <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-widest border ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a] shadow' : 'bg-white border-gray-200 hover:bg-gray-50'}`}>{tipo}</button>
+                    <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-4 py-2 rounded-full text-xs font-mono uppercase border ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a]' : 'bg-white border-gray-200'}`}>{tipo}</button>
                   ))}
                 </div>
-                <div className="space-y-6 pb-6">
+                <div className="space-y-6">
                   {filteredForActive.map((item:ServiceItem)=>(
-                    <div key={item.id} className="group rounded-[1.5rem] overflow-hidden border border-gray-100 bg-[#fcf8f5] shadow-sm hover:shadow-md transition-all cursor-zoom-in" onClick={()=>openLightbox(item)}>
-                      <div className="relative bg-white p-2">
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase shadow-sm border border-white">{item.servicio_tipo}</div>
-                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur text-white px-2.5 py-1 rounded-full text-[10px] font-mono flex items-center gap-1"><Maximize2 className="w-3 h-3"/> Click para ampliar</div>
-                        <img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto max-h-[600px] object-contain rounded-xl bg-white"/>
-                      </div>
-                      <div className="p-4 flex justify-between items-center bg-white">
-                        <div><p className="text-sm font-medium">{item.descripcion || 'Campaña '+item.servicio_tipo}</p><p className="text-[11px] font-mono text-gray-500">{item.servicio_tipo} • Imagen completa</p></div>
-                        {item.demo_url && <a href={item.demo_url} target="_blank" onClick={e=>e.stopPropagation()} className="text-[11px] font-mono uppercase text-[#ff2a2a] border border-red-100 bg-red-50 px-3 py-1.5 rounded-full">Ver <ExternalLink className="w-3 h-3 inline ml-1"/></a>}
-                      </div>
+                    <div key={item.id} className="rounded-[1.5rem] overflow-hidden border border-gray-100 bg-[#fcf8f5] cursor-zoom-in" onClick={()=>openLightbox(item)}>
+                      <div className="relative bg-white p-2"><img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto max-h-[600px] object-contain rounded-xl bg-white"/></div>
+                      <div className="p-4 flex justify-between items-center bg-white"><p className="text-sm font-medium">{item.descripcion}</p></div>
                     </div>
                   ))}
                 </div>
@@ -157,80 +164,82 @@ export default function NuestrosClientes() {
         )}
       </div>
 
-      {/* ===================== VERSIÓN MÓVIL OPTIMIZADA - SE OCULTA EN WEB ===================== */}
+      {/* ===================== MÓVIL - BOTTOM SHEET SIN DESMONTAR ===================== */}
       <div className="block md:hidden">
+        {/* Render siempre si hay selected, pero animamos con transform */}
         {selected && (
-          <div className="fixed inset-0 z-[100] bg-black/80 overflow-y-auto">
-            <div className="min-h-full flex flex-col">
-              <div className="w-full flex justify-center pt-3 pb-2 bg-white rounded-t-[2rem] sticky top-0 z-10 shrink-0"><div className="w-10 h-1.5 bg-gray-300 rounded-full"/></div>
-              <div className="bg-white w-full rounded-t-[2rem] shadow-2xl flex flex-col overflow-hidden flex-1">
-                <div className="bg-[#fcf8f5] flex flex-col shrink-0 border-b">
-                  <div className="flex gap-4 p-4">
-                    <div className="w-20 h-20 rounded-full overflow-hidden shrink-0 bg-gray-100">
-                      <img src={selected.imagen_url} className="w-full h-full object-cover object-top" loading="eager"/>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-extrabold leading-tight">{selected.nombre}</h3>
-                      <p className="text-[11px] font-mono uppercase text-[#ff2a2a] mt-1 truncate">{selected.categoria} • {selected.metrica}</p>
-                      <p className="text-[13px] text-gray-600 mt-2 line-clamp-2">{selected.descripcion}</p>
-                    </div>
-                    <button onClick={()=>setSelected(null)} className="w-9 h-9 rounded-full bg-white shadow flex items-center justify-center shrink-0 self-start"><X className="w-4 h-4"/></button>
+          <div className="fixed inset-0 z-[100] flex flex-col justify-end">
+            {/* Backdrop - fade */}
+            <div 
+              className={`absolute inset-0 bg-black transition-opacity duration-300 ${mobileOpen ? 'bg-black/80 opacity-100' : 'opacity-0 pointer-events-none'}`}
+              onClick={handleClose}
+            />
+            
+            {/* Sheet - slide up/down con transform, no se desmontan las imágenes al cerrar */}
+            <div className={`relative bg-white w-full rounded-t-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[92dvh] transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform ${mobileOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+              {/* Handle único */}
+              <div className="w-full flex justify-center pt-3 pb-2 shrink-0"><div className="w-10 h-1.5 bg-gray-300 rounded-full"/></div>
+              
+              {/* Header compacto */}
+              <div className="bg-[#fcf8f5] px-4 pb-4 flex flex-col shrink-0">
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 rounded-full overflow-hidden shrink-0 bg-gray-100">
+                    <img src={selected.imagen_url} className="w-full h-full object-cover object-top" loading="eager"/>
                   </div>
-                  <div className="px-4 pb-4">
-                    <div className="flex gap-2 flex-wrap">
-                      {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-4 h-4"/></a>}
-                      {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-4 h-4"/></a>}
-                      {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-4 h-4"/></a>}
-                      {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-4 h-4"/></a>}
-                      {selected.website_url && <a href={selected.website_url} target="_blank" className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-4 h-4"/></a>}
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[17px] font-extrabold leading-tight">{selected.nombre}</h3>
+                    <p className="text-[11px] font-mono uppercase text-[#ff2a2a] mt-1 truncate">{selected.categoria} • {selected.metrica}</p>
+                    <p className="text-[13px] text-gray-600 mt-1.5 line-clamp-2 leading-snug">{selected.descripcion}</p>
                   </div>
+                  <button onClick={handleClose} className="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center shrink-0 self-start"><X className="w-4 h-4"/></button>
                 </div>
-                <div className="p-4 bg-white flex-1">
-                  <div className="flex justify-between items-center mb-4"><h4 className="font-bold text-[13px] uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length} trabajos</span></div>
-                  <div className="flex flex-wrap gap-2 mb-5">
-                    {[...new Set(getItemsForClient(selected.id).map((i:ServiceItem)=>i.servicio_tipo))].map((tipo:string)=>(
-                      <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-3 py-1.5 rounded-full text-[11px] font-mono uppercase border ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a]' : 'bg-white border-gray-200'}`}>{tipo}</button>
-                    ))}
-                  </div>
-                  <div className="space-y-4 pb-24">
-                    {filteredForActive.map((item:ServiceItem)=>(
-                      <div key={item.id} className="rounded-[1.25rem] overflow-hidden border border-gray-100 bg-[#fcf8f5]" onClick={()=>openLightbox(item)}>
-                        <div className="relative bg-white p-1.5">
-                          <div className="absolute top-3 left-3 bg-white px-2.5 py-1 rounded-full text-[9px] font-mono font-bold uppercase shadow-sm">{item.servicio_tipo}</div>
-                          <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-full text-[9px] font-mono flex items-center gap-1"><Maximize2 className="w-3 h-3"/> Ampliar</div>
-                          <img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto max-h-[75dvh] object-contain rounded-xl bg-white"/>
-                        </div>
-                        <div className="p-3 flex justify-between items-center bg-white">
-                          <p className="text-[13px] font-medium line-clamp-1">{item.descripcion || 'Campaña '+item.servicio_tipo}</p>
-                        </div>
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-4 h-4"/></a>}
+                  {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-4 h-4"/></a>}
+                  {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-4 h-4"/></a>}
+                  {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-4 h-4"/></a>}
+                  {selected.website_url && <a href={selected.website_url} target="_blank" className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-4 h-4"/></a>}
+                </div>
+              </div>
+
+              {/* Contenido scrolleable - sin rounded extra, sin doble borde */}
+              <div className="flex-1 overflow-y-auto overscroll-contain p-4 bg-white" style={{ WebkitOverflowScrolling: 'touch' } as any}>
+                <div className="flex justify-between items-center mb-4"><h4 className="font-bold text-[13px] uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length}</span></div>
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {[...new Set(getItemsForClient(selected.id).map((i:ServiceItem)=>i.servicio_tipo))].map((tipo:string)=>(
+                    <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-3 py-1.5 rounded-full text-[11px] font-mono uppercase border ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a]' : 'bg-white border-gray-200'}`}>{tipo}</button>
+                  ))}
+                </div>
+                <div className="space-y-4 pb-28">
+                  {filteredForActive.map((item:ServiceItem)=>(
+                    <div key={item.id} className="rounded-[1.25rem] overflow-hidden border border-gray-100 bg-[#fcf8f5]" onClick={()=>openLightbox(item)}>
+                      <div className="relative bg-white p-1.5">
+                        <div className="absolute top-3 left-3 bg-white px-2.5 py-1 rounded-full text-[9px] font-mono font-bold uppercase shadow-sm">{item.servicio_tipo}</div>
+                        <img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto object-contain rounded-xl bg-white" style={{ maxHeight: '65vh' }}/>
                       </div>
-                    ))}
-                  </div>
-                  <button onClick={()=>setSelected(null)} className="fixed bottom-6 left-4 right-4 bg-gray-900 text-white rounded-full py-4 text-xs font-mono uppercase flex items-center justify-center gap-2 shadow-2xl z-20"><X className="w-4 h-4"/> Cerrar</button>
+                    </div>
+                  ))}
                 </div>
+              </div>
+
+              {/* Botón cerrar fijo */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-white/0 pt-8">
+                <button onClick={handleClose} className="w-full bg-gray-900 text-white rounded-full py-4 text-xs font-mono uppercase flex items-center justify-center gap-2 shadow-2xl active:scale-[0.98] transition-transform"><X className="w-4 h-4"/> Cerrar</button>
+                <div className="h-[env(safe-area-inset-bottom)]"></div>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* LIGHTBOX - compartido */}
+      {/* Lightbox */}
       {lightbox && (
         <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4" onClick={()=>setLightbox(null)}>
           <button onClick={()=>setLightbox(null)} className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center"><X className="w-5 h-5"/></button>
-          {filteredForActive.length > 1 && (
-            <>
-              <button onClick={(e)=>{e.stopPropagation(); const idx=(lightboxIndex-1+filteredForActive.length)%filteredForActive.length; setLightboxIndex(idx); setLightbox(filteredForActive[idx]);}} className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center"><ChevronLeft className="w-6 h-6"/></button>
-              <button onClick={(e)=>{e.stopPropagation(); const idx=(lightboxIndex+1)%filteredForActive.length; setLightboxIndex(idx); setLightbox(filteredForActive[idx]);}} className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center"><ChevronRight className="w-6 h-6"/></button>
-            </>
-          )}
-          <div className="max-w-6xl w-full flex flex-col items-center" onClick={e=>e.stopPropagation()}>
-            <img src={lightbox.imagen_url} alt={lightbox.servicio_tipo} className="max-w-full max-h-[80vh] object-contain rounded-2xl bg-white"/>
-            <div className="mt-4 bg-white/10 border border-white/20 rounded-full px-5 py-2 flex items-center gap-2 text-white text-xs"><span className="font-bold uppercase">{lightbox.servicio_tipo}</span><span>•</span><span>{lightboxIndex+1}/{filteredForActive.length}</span></div>
-          </div>
+          <img src={lightbox.imagen_url} alt={lightbox.servicio_tipo} className="max-w-full max-h-[85vh] object-contain rounded-2xl bg-white" onClick={e=>e.stopPropagation()}/>
         </div>
       )}
     </>
   );
 }
+
