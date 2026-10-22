@@ -2,259 +2,242 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/app/lib/supabase';
-import { LogOut, Upload, Trash2, Edit, Eye, EyeOff, Users, BookOpen, Briefcase, Image as ImageIcon, Video, FileUp, Sparkles, Plus, X } from 'lucide-react';
+import { ArrowUpRight, X, Globe, ExternalLink, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'NetPro2024!';
-const categoriasClientes = ['Medicina', 'Educación', 'Marcas Personales', 'Multinivel', 'Belleza', 'Eventos'];
+type Categoria = 'Todos' | 'Medicina' | 'Educación' | 'Marcas Personales' | 'Multinivel' | 'Belleza' | 'Eventos';
+const categorias: Categoria[] = ['Todos', 'Medicina', 'Educación', 'Marcas Personales', 'Multinivel', 'Belleza', 'Eventos'];
 const tiposServicio = ['Branding','Diseño Web','Meta Ads','Redes Sociales','Creación de Contenido'] as const;
 
-export default function AdminUnificadoV6() {
-  const [isAuth, setIsAuth] = useState(false);
-  const [loginUser, setLoginUser] = useState('');
-  const [loginPass, setLoginPass] = useState('');
-  const [showPass, setShowPass] = useState(false);
-  const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'clientes' | 'cursos' | 'alumnos'>('clientes');
+type ServiceItem = {
+  id: string;
+  client_id: string;
+  servicio_tipo: typeof tiposServicio[number];
+  imagen_url: string;
+  demo_url?: string;
+  descripcion?: string;
+};
 
+const Icon = {
+  Facebook: (p:any) => (<svg {...p} viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>),
+  Instagram: (p:any) => (<svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>),
+  TikTok: (p:any) => (<svg {...p} viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-1.77V18a4.5 4.5 0 11-4.5-4.5c.26 0 .51.02.75.06V9.8a8.5 8.5 0 00-.75-.05A8.5 8.5 0 108.5 18V6.69a8.5 8.5 0 0011.09 0z"/></svg>),
+  Youtube: (p:any) => (<svg {...p} viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 12.2c0-3.1-.2-5.4-.5-6.1-.3-.7-.7-1.2-1.4-1.5-.7-.3-3-.5-6.1-.5h-7c-3.1 0-5.4.2-6.1.5-.7.3-1.2.8-1.5 1.5-.3.7-.5 3-.5 6.1s.2 5.4.5 6.1c.3.7.8 1.2 1.5 1.5.7.3 3 .5 6.1.5h7c3.1 0 5.4-.2 6.1-.5.7-.3 1.1-.8 1.4-1.5.3-.7.5-3 .5-6.1zM9.75 15.5v-7l6 3.5-6 3.5z"/></svg>),
+};
+
+export default function NuestrosClientes() {
   const [clients, setClients] = useState<any[]>([]);
-  const [serviceItems, setServiceItems] = useState<any[]>([]);
-  const [clientForm, setClientForm] = useState<any>({ nombre: '', categoria: 'Medicina', descripcion: '', imagen_url: '', metrica: '', website_url: '', instagram_url: '', facebook_url: '', tiktok_url: '', youtube_url: '' });
-  const [editingClientId, setEditingClientId] = useState<string | null>(null);
-  const [uploadingClient, setUploadingClient] = useState(false);
+  const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
+  const [activeCat, setActiveCat] = useState<Categoria>('Todos');
+  const [selected, setSelected] = useState<any | null>(null);
+  const [activeService, setActiveService] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lightbox, setLightbox] = useState<ServiceItem | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isIOS, setIsIOS] = useState(false);
 
-  // Servicio demo form
-  const [serviceForm, setServiceForm] = useState({ servicio_tipo: 'Branding' as any, imagen_url: '', demo_url: '', descripcion: '' });
-  const [uploadingService, setUploadingService] = useState(false);
-  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    setIsIOS(/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  }, []);
 
-  const [courses, setCourses] = useState<any[]>([]);
-  const [courseForm, setCourseForm] = useState({ titulo: '', slug: '', descripcion: '', miniatura_url: '', contenido: '', video_url: '' });
-  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
-  const [uploadingCourse, setUploadingCourse] = useState(false);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
+  useEffect(() => { fetchAll(); }, []);
 
-  const [users, setUsers] = useState<any[]>([]);
-  const [enrollments, setEnrollments] = useState<any[]>([]);
-  const [userForm, setUserForm] = useState({ nombre: '', empresa: '', usuario: '', password: '' });
-  const [editingUserId, setEditingUserId] = useState<string | null>(null);
-  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
-
-  useEffect(() => { if (localStorage.getItem('netpro_admin_auth')==='true') setIsAuth(true); }, []);
-  useEffect(() => { if (isAuth) fetchAll(); }, [isAuth]);
+  // SCROLL LOCK - DESACTIVADO EN iOS PARA EVITAR FREEZE DE 7 SEGUNDOS
+  useEffect(() => {
+    if (isIOS) return; // En iPhone NO bloqueamos overflow, es lo que causa el freeze
+    if (selected || lightbox) {
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.documentElement.style.overflow = '';
+    };
+  }, [selected, lightbox, isIOS]);
 
   const fetchAll = async () => {
+    setLoading(true);
     const { data: cl } = await supabase.from('clients').select('*').order('created_at', { ascending: false });
-    const { data: si } = await supabase.from('client_service_items').select('*').order('created_at', { ascending: true });
-    const { data: co } = await supabase.from('portal_courses').select('*').order('created_at', { ascending: false });
-    const { data: us } = await supabase.from('portal_users').select('*').order('created_at', { ascending: false });
-    const { data: en } = await supabase.from('portal_enrollments').select('*');
+    const { data: items } = await supabase.from('client_service_items').select('*').order('created_at', { ascending: true });
     if (cl) setClients(cl);
-    if (si) setServiceItems(si);
-    if (co) setCourses(co);
-    if (us) setUsers(us);
-    if (en) setEnrollments(en);
+    if (items) setServiceItems(items as any);
+    setLoading(false);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loginUser===ADMIN_USER && loginPass===ADMIN_PASS) { localStorage.setItem('netpro_admin_auth','true'); setIsAuth(true); }
-    else setLoginError('Usuario o contraseña incorrectos');
+  const getItemsForClient = (clientId: string) => serviceItems.filter(i => i.client_id === clientId);
+  const filtered = activeCat === 'Todos' ? clients : clients.filter((c:any)=>c.categoria===activeCat);
+  
+  const handleOpen = (client:any) => {
+    setSelected(client);
+    const items = getItemsForClient(client.id);
+    setActiveService(items.length > 0 ? items[0].servicio_tipo : null);
   };
 
-  const uploadToBucket = async (file: File, bucket: string) => {
-    const fileName = `${Date.now()}-${file.name.replace(/\s/g,'-')}`;
-    const { error } = await supabase.storage.from(bucket).upload(fileName, file);
-    if (error) throw error;
-    const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
-    return data.publicUrl;
+  const handleClose = () => {
+    // CIERRE INSTANTÁNEO iOS - desmontaje inmediato sin animación ni scroll restore
+    setSelected(null);
   };
 
-  const slugify = (t:string)=>t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-
-  // CLIENTE CRUD
-  const saveClient = async () => {
-    if (editingClientId) {
-      await supabase.from('clients').update(clientForm).eq('id', editingClientId);
-      setEditingClientId(null);
-    } else {
-      const { data } = await supabase.from('clients').insert(clientForm).select().single();
-      if (data) setEditingClientId(data.id);
-    }
-    setClientForm({ nombre: '', categoria: 'Medicina', descripcion: '', imagen_url: '', metrica: '', website_url: '', instagram_url: '', facebook_url: '', tiktok_url: '', youtube_url: '' });
-    fetchAll();
+  const openLightbox = (item: ServiceItem) => {
+    const filteredItems = getItemsForClient(selected.id).filter((i:ServiceItem)=>!activeService || i.servicio_tipo===activeService);
+    const idx = filteredItems.findIndex((i:ServiceItem)=>i.id===item.id);
+    setLightboxIndex(idx >=0 ? idx : 0);
+    setLightbox(item);
   };
-
-  // SERVICIO ITEM CRUD
-  const handleServiceImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
-    setUploadingService(true);
-    try { const url = await uploadToBucket(file, 'client-images'); setServiceForm({...serviceForm, imagen_url: url}); } catch(err:any){ alert(err.message); }
-    setUploadingService(false);
+  const filteredForActive = selected ? getItemsForClient(selected.id).filter((i:ServiceItem)=>!activeService || i.servicio_tipo===activeService) : [];
+  
+  const nextLightbox = () => {
+    if (!selected) return;
+    const items = getItemsForClient(selected.id).filter((i:ServiceItem)=>!activeService || i.servicio_tipo===activeService);
+    const nextIdx = (lightboxIndex + 1) % items.length;
+    setLightboxIndex(nextIdx); setLightbox(items[nextIdx]);
   };
-
-  const saveServiceItem = async () => {
-    if (!editingClientId) return alert('Primero crea y selecciona un cliente');
-    if (!serviceForm.imagen_url) return alert('Sube una imagen demo del servicio');
-    const payload = { client_id: editingClientId, ...serviceForm };
-    if (editingServiceId) {
-      await supabase.from('client_service_items').update(payload).eq('id', editingServiceId);
-      setEditingServiceId(null);
-    } else {
-      await supabase.from('client_service_items').insert(payload);
-    }
-    setServiceForm({ servicio_tipo: 'Branding', imagen_url: '', demo_url: '', descripcion: '' });
-    fetchAll();
+  const prevLightbox = () => {
+    if (!selected) return;
+    const items = getItemsForClient(selected.id).filter((i:ServiceItem)=>!activeService || i.servicio_tipo===activeService);
+    const prevIdx = (lightboxIndex - 1 + items.length) % items.length;
+    setLightboxIndex(prevIdx); setLightbox(items[prevIdx]);
   };
-
-  if (!isAuth) {
-    return (
-      <div className="min-h-screen bg-[#fcf8f5] flex items-center justify-center p-6">
-        <form onSubmit={handleLogin} className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white shadow-xl p-8 w-full max-w-sm">
-          <h1 className="text-xl font-extrabold text-center">Admin NetPro V6</h1>
-          <div className="space-y-3 mt-6">
-            <input value={loginUser} onChange={e=>setLoginUser(e.target.value)} placeholder="admin" className="w-full border p-3 rounded-xl text-sm"/>
-            <input type={showPass?'text':'password'} value={loginPass} onChange={e=>setLoginPass(e.target.value)} placeholder="pass" className="w-full border p-3 rounded-xl text-sm"/>
-            {loginError && <div className="text-xs text-red-600 bg-red-50 p-2 rounded">{loginError}</div>}
-            <button type="submit" className="w-full bg-[#ff2a2a] text-white py-3 rounded-full text-xs uppercase font-semibold">Entrar</button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  const itemsForSelected = serviceItems.filter(s=>s.client_id===editingClientId);
 
   return (
-    <div className="min-h-screen bg-[#fcf8f5]">
-      <div className="sticky top-0 z-30 flex justify-center px-4 pt-6">
-        <div className="w-full max-w-7xl bg-white/80 backdrop-blur-2xl border border-white rounded-full px-6 py-3 flex justify-between items-center shadow">
-          <a href="/" className="flex items-center gap-2 font-bold text-xs font-mono uppercase"><img src="/logo-netpro.png" className="h-7" alt="logo"/> NetPro Admin → Inicio</a>
-          <div className="flex gap-2">
-            <button onClick={()=>setActiveTab('clientes')} className={`px-4 py-2 rounded-full text-[11px] font-mono uppercase font-semibold border ${activeTab==='clientes'?'bg-gray-900 text-white':'bg-white'}`}><Briefcase className="w-3.5 h-3.5 inline mr-1"/> Clientes</button>
-            <button onClick={()=>setActiveTab('cursos')} className={`px-4 py-2 rounded-full text-[11px] font-mono uppercase font-semibold border ${activeTab==='cursos'?'bg-gray-900 text-white':'bg-white'}`}>Cursos</button>
-            <button onClick={()=>setActiveTab('alumnos')} className={`px-4 py-2 rounded-full text-[11px] font-mono uppercase font-semibold border ${activeTab==='alumnos'?'bg-[#ff2a2a] text-white':'bg-white'}`}>Alumnos</button>
-          </div>
-          <button onClick={()=>{localStorage.removeItem('netpro_admin_auth'); setIsAuth(false);}} className="text-[11px] border px-3 py-1.5 rounded-full">Salir</button>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto p-6 pt-10">
-        {activeTab==='clientes' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5 bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white shadow p-7 h-fit sticky top-28 space-y-6">
-              <h2 className="font-bold text-sm uppercase tracking-widest">{editingClientId ? 'Editar Cliente' : 'Nuevo Cliente'}</h2>
-              <div className="space-y-3">
-                <input value={clientForm.nombre} onChange={e=>setClientForm({...clientForm, nombre:e.target.value})} placeholder="Nombre cliente" className="w-full border p-3 rounded-xl text-sm"/>
-                <div className="grid grid-cols-2 gap-2"><select value={clientForm.categoria} onChange={e=>setClientForm({...clientForm, categoria:e.target.value})} className="border p-3 rounded-xl text-sm">{categoriasClientes.map(c=><option key={c}>{c}</option>)}</select><input value={clientForm.metrica} onChange={e=>setClientForm({...clientForm, metrica:e.target.value})} placeholder="+180% Leads" className="border p-3 rounded-xl text-sm"/></div>
-                <div><label className="text-[11px] font-mono uppercase">Foto principal 3:4 (desde PC)</label><input type="file" accept="image/*" onChange={async e=>{ const f=e.target.files?.[0]; if(!f) return; setUploadingClient(true); try{ const url=await uploadToBucket(f,'client-images'); setClientForm({...clientForm, imagen_url:url}); }catch(err:any){alert(err.message);} setUploadingClient(false); }} className="w-full text-xs mt-1"/><div className="text-xs">{uploadingClient?'Subiendo...':''}</div>{clientForm.imagen_url && <img src={clientForm.imagen_url} className="w-full aspect-[3/4] object-cover rounded-xl mt-2"/>}</div>
-                <textarea value={clientForm.descripcion} onChange={e=>setClientForm({...clientForm, descripcion:e.target.value})} placeholder="Descripción corta" className="w-full border p-3 rounded-xl text-sm h-20"/>
-                <div className="grid grid-cols-1 gap-2"><p className="text-[11px] font-mono uppercase text-gray-500">Redes - solo se activa icono si pegas URL</p><input value={clientForm.instagram_url} onChange={e=>setClientForm({...clientForm, instagram_url:e.target.value})} placeholder="Instagram URL" className="w-full border p-3 rounded-xl text-sm"/><input value={clientForm.facebook_url} onChange={e=>setClientForm({...clientForm, facebook_url:e.target.value})} placeholder="Facebook URL" className="w-full border p-3 rounded-xl text-sm"/><input value={clientForm.tiktok_url} onChange={e=>setClientForm({...clientForm, tiktok_url:e.target.value})} placeholder="TikTok URL" className="w-full border p-3 rounded-xl text-sm"/><input value={clientForm.youtube_url} onChange={e=>setClientForm({...clientForm, youtube_url:e.target.value})} placeholder="YouTube URL" className="w-full border p-3 rounded-xl text-sm"/><input value={clientForm.website_url} onChange={e=>setClientForm({...clientForm, website_url:e.target.value})} placeholder="Sitio Web URL" className="w-full border p-3 rounded-xl text-sm"/></div>
-                <button onClick={saveClient} className="w-full bg-gray-900 text-white py-3 rounded-full text-xs uppercase font-semibold">{editingClientId?'Actualizar Cliente':'Crear Cliente'}</button>
-                {editingClientId && <p className="text-[11px] font-mono text-green-600 text-center">Cliente seleccionado: ahora agrega servicios abajo</p>}
-              </div>
-
-              {/* SECCIÓN NUEVA - SERVICIOS CON IMAGEN */}
-              {editingClientId && (
-                <div className="border-t pt-6 mt-6">
-                  <h3 className="font-bold text-xs uppercase tracking-widest flex items-center gap-2"><Sparkles className="w-4 h-4 text-[#ff2a2a]"/> Servicios + Imagen Demo (varios)</h3>
-                  <div className="mt-4 space-y-3 bg-[#fcf8f5] p-4 rounded-2xl border border-white">
-                    <select value={serviceForm.servicio_tipo} onChange={e=>setServiceForm({...serviceForm, servicio_tipo:e.target.value as any})} className="w-full border p-3 rounded-xl text-sm bg-white">{tiposServicio.map(t=><option key={t}>{t}</option>)}</select>
-                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 bg-white"><input type="file" accept="image/*" onChange={handleServiceImageUpload} className="w-full text-xs"/><div className="text-[11px] text-gray-500 mt-1">{uploadingService?'Subiendo imagen demo...':'Sube imagen del trabajo realizado para este servicio'}</div>{serviceForm.imagen_url && <img src={serviceForm.imagen_url} className="w-full aspect-[4/3] object-cover rounded-xl mt-2"/>}</div>
-                    <input value={serviceForm.demo_url} onChange={e=>setServiceForm({...serviceForm, demo_url:e.target.value})} placeholder="Link demo (opcional) ej: sitio web" className="w-full border p-3 rounded-xl text-sm"/>
-                    <input value={serviceForm.descripcion} onChange={e=>setServiceForm({...serviceForm, descripcion:e.target.value})} placeholder="Descripción corta del trabajo (opcional)" className="w-full border p-3 rounded-xl text-sm"/>
-                    <button onClick={saveServiceItem} className="w-full bg-[#ff2a2a] text-white py-3 rounded-full text-xs uppercase font-semibold flex items-center justify-center gap-2"><Plus className="w-4 h-4"/> {editingServiceId?'Actualizar Servicio':'Agregar Servicio con Imagen'}</button>
-                    {editingServiceId && <button onClick={()=>{setEditingServiceId(null); setServiceForm({ servicio_tipo:'Branding', imagen_url:'', demo_url:'', descripcion:''});}} className="w-full border bg-white py-2 rounded-full text-xs">Cancelar edición</button>}
-                  </div>
-
-                  <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
-                    {itemsForSelected.map((item:any)=>(
-                      <div key={item.id} className="flex gap-2 items-center bg-white border rounded-xl p-2">
-                        <img src={item.imagen_url} className="w-12 h-12 rounded-lg object-cover"/>
-                        <div className="flex-1"><p className="text-xs font-bold">{item.servicio_tipo}</p><p className="text-[11px] text-gray-500 line-clamp-1">{item.descripcion}</p></div>
-                        <button onClick={()=>{setServiceForm({ servicio_tipo:item.servicio_tipo, imagen_url:item.imagen_url, demo_url:item.demo_url||'', descripcion:item.descripcion||''}); setEditingServiceId(item.id);}} className="p-1.5 border rounded-full"><Edit className="w-3.5 h-3.5"/></button>
-                        <button onClick={async()=>{ if(confirm('¿Eliminar demo?')){ await supabase.from('client_service_items').delete().eq('id',item.id); fetchAll(); }}} className="p-1.5 border border-red-100 text-red-600 rounded-full"><Trash2 className="w-3.5 h-3.5"/></button>
-                      </div>
-                    ))}
-                    {itemsForSelected.length===0 && <p className="text-[11px] text-gray-400 font-mono">Aún no has agregado servicios con imagen para este cliente. Agrega Branding, Web, etc. con su foto demo.</p>}
-                  </div>
-                </div>
-              )}
+    <>
+      <section id="clientes" className="py-28 px-6 relative z-10 border-t border-white/40 bg-white/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+            <div>
+              <span className="text-xs font-mono tracking-widest uppercase text-[#ff2a2a] bg-red-50/80 px-3 py-1 rounded-full border border-red-100 font-semibold">02 // Nuestros Clientes</span>
+              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 text-gray-900">Clientes Reales</h2>
             </div>
-
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {clients.map((c:any)=>{
-                const its = serviceItems.filter((s:any)=>s.client_id===c.id);
+            <p className="text-gray-600 max-w-md text-sm leading-relaxed">Cada servicio con demo visual completa.</p>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-10">
+            {categorias.map(cat => (
+              <button key={cat} onClick={() => setActiveCat(cat)} className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider border ${activeCat===cat ? 'bg-gray-900 text-white border-gray-900' : 'bg-white/60 border-white/80 hover:bg-white'}`}>{cat}</button>
+            ))}
+          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1,2,3].map(i=><div key={i} className="aspect-[3/4] bg-white/60 rounded-3xl animate-pulse"/> )}</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((client:any) => {
+                const items = getItemsForClient(client.id);
+                const tipos = [...new Set(items.map(i=>i.servicio_tipo))];
                 return (
-                  <div key={c.id} className="bg-white/80 rounded-[2rem] border border-white shadow overflow-hidden">
-                    <img src={c.imagen_url} className="w-full aspect-[3/4] object-cover object-top"/>
-                    <div className="p-4"><p className="font-bold text-sm">{c.nombre}</p><p className="text-xs text-gray-500">{c.categoria} • {its.length} demos</p><div className="flex gap-1 mt-2 flex-wrap">{its.map((it:any)=><span key={it.id} className="text-[9px] bg-red-50 border border-red-100 px-2 py-0.5 rounded-full text-[#ff2a2a]">{it.servicio_tipo}</span>)}</div><div className="flex gap-2 mt-3"><button onClick={()=>{setClientForm({ nombre:c.nombre, categoria:c.categoria, descripcion:c.descripcion||'', imagen_url:c.imagen_url||'', metrica:c.metrica||'', website_url:c.website_url||'', instagram_url:c.instagram_url||'', facebook_url:c.facebook_url||'', tiktok_url:c.tiktok_url||'', youtube_url:c.youtube_url||''}); setEditingClientId(c.id); window.scrollTo({top:0, behavior:'smooth'});}} className="flex-1 border rounded-full py-1.5 text-[11px] font-mono uppercase">Editar + Servicios</button><button onClick={async()=>{if(confirm('¿Eliminar cliente y sus demos?')){await supabase.from('clients').delete().eq('id',c.id); fetchAll();}}} className="px-3 border border-red-100 text-red-600 rounded-full"><Trash2 className="w-3.5 h-3.5"/></button></div></div>
+                  <div key={client.id} className="group bg-white rounded-3xl overflow-hidden border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-shadow cursor-pointer flex flex-col" onClick={()=>handleOpen(client)}>
+                    <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                      <img src={client.imagen_url} alt={client.nombre} loading="lazy" className="w-full h-full object-cover object-top"/>
+                      <div className="absolute top-3 left-3 bg-white px-3 py-1 rounded-full text-[10px] font-mono font-bold text-[#ff2a2a] uppercase">{client.categoria}</div>
+                      {client.metrica && <div className="absolute bottom-3 left-3 bg-black/70 px-3 py-1 rounded-lg text-[11px] font-mono text-white">{client.metrica}</div>}
+                    </div>
+                    <div className="p-6 flex flex-col flex-1">
+                      <h3 className="text-lg font-bold text-gray-900">{client.nombre}</h3>
+                      <p className="text-gray-600 text-sm mt-2 line-clamp-2">{client.descripcion}</p>
+                      <div className="flex flex-wrap gap-1.5 mt-4">{tipos.length>0 ? tipos.map((t:string)=><span key={t} className="text-[10px] font-mono bg-red-50 border border-red-100 px-2.5 py-1 rounded-full text-[#ff2a2a] font-medium">{t}</span>) : null}</div>
+                      <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center text-[11px] font-mono uppercase text-gray-500"><span>{items.length} demos</span><span className="text-[#ff2a2a] flex items-center gap-1 font-semibold">Ver <ArrowUpRight className="w-3.5 h-3.5"/></span></div>
+                    </div>
                   </div>
                 );
               })}
             </div>
-          </div>
-        )}
-        
-        {activeTab==='cursos' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5 bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white shadow p-7 h-fit sticky top-28">
-              <h2 className="font-bold text-sm uppercase tracking-widest">{editingCourseId ? 'Editar Curso' : 'Nuevo Curso'}</h2>
-              <div className="space-y-3 mt-4">
-                <input value={courseForm.titulo} onChange={e=>setCourseForm({...courseForm, titulo:e.target.value, slug:e.target.value.toLowerCase().replace(/[^a-z0-9]+/g,'-')})} placeholder="Título curso" className="w-full border p-3 rounded-xl text-sm"/>
-                <div className="border-2 border-dashed border-gray-200 rounded-xl p-3"><input type="file" accept="image/*" onChange={async e=>{ const f=e.target.files?.[0]; if(!f) return; setUploadingCourse(true); try{ const url=await uploadToBucket(f,'client-images'); setCourseForm({...courseForm, miniatura_url:url}); }catch{} setUploadingCourse(false); }} className="w-full text-xs"/><div className="text-xs">{uploadingCourse?'Subiendo...':''}</div>{courseForm.miniatura_url && <img src={courseForm.miniatura_url} className="w-full aspect-[16/10] object-cover rounded-xl mt-2"/>}</div>
-                <div className="border-2 border-dashed border-red-100 bg-red-50/30 rounded-xl p-3"><input type="file" accept="video/*" onChange={async e=>{ const f=e.target.files?.[0]; if(!f) return; setUploadingVideo(true); try{ const url=await uploadToBucket(f,'curso-videos'); setCourseForm({...courseForm, video_url:url}); }catch(err:any){ alert('Crea bucket curso-videos'); } setUploadingVideo(false); }} className="w-full text-xs"/><div className="text-xs">{uploadingVideo?'Subiendo video...':''}</div></div>
-                <textarea value={courseForm.descripcion} onChange={e=>setCourseForm({...courseForm, descripcion:e.target.value})} placeholder="Descripción" className="w-full border p-3 rounded-xl text-sm h-20"/>
-                <textarea value={courseForm.contenido} onChange={e=>setCourseForm({...courseForm, contenido:e.target.value})} placeholder="Contenido / temario" className="w-full border p-3 rounded-xl text-sm h-24"/>
-                <button onClick={async()=>{
-                  const slug = courseForm.slug || courseForm.titulo.toLowerCase().replace(/[^a-z0-9]+/g,'-');
-                  const payload = {...courseForm, slug};
-                  if(editingCourseId){ await supabase.from('portal_courses').update(payload).eq('id',editingCourseId); setEditingCourseId(null); }
-                  else { await supabase.from('portal_courses').insert(payload); }
-                  setCourseForm({ titulo:'', slug:'', descripcion:'', miniatura_url:'', contenido:'', video_url:'' }); fetchAll();
-                }} className="w-full bg-[#ff2a2a] text-white py-3 rounded-full text-xs uppercase font-semibold">{editingCourseId?'Actualizar':'Crear Curso'}</button>
-              </div>
-            </div>
-            <div className="lg:col-span-7 space-y-3">
-              {courses.map((c:any)=>(
-                <div key={c.id} className="bg-white/80 rounded-2xl border p-4 flex gap-3">
-                  <img src={c.miniatura_url} className="w-24 h-16 rounded-xl object-cover"/>
-                  <div className="flex-1"><p className="font-bold text-sm">{c.titulo}</p><p className="text-xs text-gray-500">{c.slug}</p></div>
-                  <button onClick={()=>{setCourseForm({ titulo:c.titulo, slug:c.slug, descripcion:c.descripcion||'', miniatura_url:c.miniatura_url||'', contenido:c.contenido||'', video_url:c.video_url||''}); setEditingCourseId(c.id);}} className="text-xs border px-3 py-1 rounded-full">Editar</button>
-                  <button onClick={async()=>{ if(confirm('Eliminar?')){ await supabase.from('portal_courses').delete().eq('id',c.id); fetchAll(); }}} className="text-xs border border-red-100 text-red-600 px-3 py-1 rounded-full">Eliminar</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {activeTab==='alumnos' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5 bg-white/80 rounded-[2rem] border border-white shadow p-7 h-fit sticky top-28">
-              <h2 className="font-bold text-sm uppercase tracking-widest">{editingUserId?'Editar Alumno':'Nuevo Alumno'}</h2>
-              <div className="space-y-3 mt-4">
-                <input value={userForm.nombre} onChange={e=>setUserForm({...userForm, nombre:e.target.value})} placeholder="Nombre" className="w-full border p-3 rounded-xl text-sm"/>
-                <input value={userForm.empresa} onChange={e=>setUserForm({...userForm, empresa:e.target.value})} placeholder="Empresa" className="w-full border p-3 rounded-xl text-sm"/>
-                <div className="grid grid-cols-2 gap-2"><input value={userForm.usuario} onChange={e=>setUserForm({...userForm, usuario:e.target.value})} placeholder="usuario" className="border p-3 rounded-xl text-sm"/><input value={userForm.password} onChange={e=>setUserForm({...userForm, password:e.target.value})} placeholder="password" className="border p-3 rounded-xl text-sm"/></div>
-                <div className="max-h-40 overflow-y-auto space-y-1">{courses.map((c:any)=><label key={c.id} className="flex gap-2 text-xs border p-2 rounded-xl"><input type="checkbox" checked={selectedCourses.includes(c.id)} onChange={e=>{ if(e.target.checked) setSelectedCourses([...selectedCourses,c.id]); else setSelectedCourses(selectedCourses.filter(id=>id!==c.id)); }}/>{c.titulo}</label>)}</div>
-                <button onClick={async()=>{
-                  if(!userForm.nombre || !userForm.usuario) return alert('Falta nombre/usuario');
-                  if(editingUserId){ await supabase.from('portal_users').update(userForm).eq('id',editingUserId); await supabase.from('portal_enrollments').delete().eq('user_id',editingUserId); for(const cid of selectedCourses) await supabase.from('portal_enrollments').insert({user_id:editingUserId, course_id:cid}); setEditingUserId(null); }
-                  else { const {data}=await supabase.from('portal_users').insert(userForm).select().single(); if(data){ for(const cid of selectedCourses) await supabase.from('portal_enrollments').insert({user_id:data.id, course_id:cid}); } }
-                  setUserForm({ nombre:'', empresa:'', usuario:'', password:'' }); setSelectedCourses([]); fetchAll();
-                }} className="w-full bg-[#ff2a2a] text-white py-3 rounded-full text-xs uppercase font-semibold">Guardar Alumno</button>
-              </div>
-            </div>
-            <div className="lg:col-span-7 space-y-2">
-              {users.map((u:any)=>{
-                const enrolls = enrollments.filter((en:any)=>en.user_id===u.id);
-                const names = enrolls.map((en:any)=>courses.find((c:any)=>c.id===en.course_id)?.titulo).filter(Boolean);
-                return <div key={u.id} className="bg-white border rounded-2xl p-4 flex justify-between"><div><p className="font-bold text-sm">{u.nombre}</p><p className="text-xs font-mono">@{u.usuario} • {u.password}</p><p className="text-[11px] mt-1">{names.join(', ')||'Sin cursos'}</p></div><div className="flex gap-1"><button onClick={async()=>{setUserForm({nombre:u.nombre, empresa:u.empresa||'', usuario:u.usuario, password:u.password}); setEditingUserId(u.id); const {data}=await supabase.from('portal_enrollments').select('course_id').eq('user_id',u.id); if(data) setSelectedCourses(data.map((d:any)=>d.course_id));}} className="text-xs border px-2 py-1 rounded-full">Editar</button><button onClick={async()=>{ if(confirm('Eliminar?')){ await supabase.from('portal_users').delete().eq('id',u.id); fetchAll(); }}} className="text-xs border border-red-100 text-red-600 px-2 py-1 rounded-full">Eliminar</button></div></div>
-              })}
-            </div>
-          </div>
-        )}
+          )}
+        </div>
+      </section>
 
-      </div>
-    </div>
+      {/* MODAL iOS FIX - SIN OVERFLOW HIDDEN, SIN POSITION FIXED EN BODY */}
+      {selected && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/80 flex flex-col"
+          style={{ WebkitOverflowScrolling: 'touch' } as any}
+        >
+          {/* Contenedor con scroll nativo iOS */}
+          <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as any}>
+            <div className="min-h-full flex flex-col md:items-center md:justify-center md:p-6">
+              <div className="md:hidden w-full flex justify-center pt-3 pb-2 bg-white rounded-t-[2rem] sticky top-0 z-10 shrink-0"><div className="w-10 h-1.5 bg-gray-300 rounded-full"/></div>
+              
+              <div className="bg-white w-full md:max-w-6xl md:rounded-[2rem] rounded-t-[2rem] rounded-b-none md:rounded-b-[2rem] shadow-2xl flex flex-col lg:flex-row overflow-hidden mt-auto md:mt-8 mb-0 md:mb-8">
+                {/* IZQUIERDA COMPACTA */}
+                <div className="lg:w-[36%] bg-[#fcf8f5] flex flex-col shrink-0 border-b lg:border-b-0 lg:border-r border-white">
+                  <div className="flex md:flex-col gap-4 p-4 md:p-7">
+                    <div className="relative w-20 h-20 md:w-full md:h-auto md:aspect-[3/4] rounded-full md:rounded-2xl overflow-hidden shrink-0 bg-gray-100">
+                      <img src={selected.imagen_url} className="w-full h-full object-cover object-top" loading="eager"/>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg md:text-2xl font-extrabold leading-tight">{selected.nombre}</h3>
+                      <p className="text-[11px] md:text-xs font-mono uppercase text-[#ff2a2a] mt-1">{selected.categoria} • {selected.metrica}</p>
+                      <p className="text-[13px] md:text-sm text-gray-600 mt-2 md:mt-4 leading-relaxed line-clamp-2 md:line-clamp-none">{selected.descripcion}</p>
+                    </div>
+                    <button onClick={handleClose} className="w-9 h-9 rounded-full bg-white shadow flex items-center justify-center shrink-0 self-start"><X className="w-4 h-4"/></button>
+                  </div>
+                  
+                  <div className="px-4 md:px-7 pb-4 md:pb-7">
+                    <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-widest text-gray-500 mb-2">Redes del cliente</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                      {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                      {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                      {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                      {selected.website_url && <a href={selected.website_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* DERECHA */}
+                <div className="lg:w-[64%] p-4 md:p-7 bg-white flex flex-col flex-1">
+                  <div className="flex justify-between items-center mb-4 shrink-0"><h4 className="font-bold text-[13px] md:text-sm uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length} trabajos</span></div>
+
+                  <div className="flex flex-wrap gap-2 mb-5 shrink-0">
+                    {[...new Set(getItemsForClient(selected.id).map((i:ServiceItem)=>i.servicio_tipo))].map((tipo:string)=>(
+                      <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-[11px] md:text-xs font-mono uppercase tracking-widest border ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a]' : 'bg-white border-gray-200'}`}>{tipo}</button>
+                    ))}
+                  </div>
+
+                  <div className="space-y-4 md:space-y-6 pb-6">
+                    {filteredForActive.map((item:ServiceItem)=>(
+                      <div key={item.id} className="rounded-[1.25rem] overflow-hidden border border-gray-100 bg-[#fcf8f5] cursor-pointer" onClick={()=>openLightbox(item)}>
+                        <div className="relative bg-white p-1.5 md:p-2">
+                          <div className="absolute top-3 left-3 z-10 bg-white px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-mono font-bold uppercase shadow-sm">{item.servicio_tipo}</div>
+                          <div className="absolute top-3 right-3 z-10 bg-black/70 text-white px-2 py-1 rounded-full text-[9px] md:text-[10px] font-mono flex items-center gap-1"><Maximize2 className="w-3 h-3"/> Ampliar</div>
+                          <img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto max-h-[75dvh] md:max-h-[600px] object-contain rounded-xl bg-white"/>
+                        </div>
+                        <div className="p-3 md:p-4 flex justify-between items-center bg-white">
+                          <div><p className="text-[13px] md:text-sm font-medium text-gray-900 line-clamp-1">{item.descripcion || 'Campaña '+item.servicio_tipo}</p><p className="text-[10px] md:text-[11px] font-mono text-gray-500 mt-0.5">{item.servicio_tipo}</p></div>
+                          {item.demo_url && <a href={item.demo_url} target="_blank" onClick={e=>e.stopPropagation()} className="text-[10px] md:text-[11px] font-mono uppercase text-[#ff2a2a] border border-red-100 bg-red-50 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full">Ver <ExternalLink className="w-3 h-3 inline ml-1"/></a>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button onClick={handleClose} className="w-full border border-gray-200 bg-white rounded-full py-4 text-xs font-mono uppercase flex items-center justify-center gap-2 shrink-0 active:bg-gray-100"><X className="w-4 h-4"/> Cerrar</button>
+                  <div className="h-[calc(20px+env(safe-area-inset-bottom))] shrink-0"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LIGHTBOX iOS FIX */}
+      {lightbox && (
+        <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4 md:p-8" onClick={()=>setLightbox(null)}>
+          <button onClick={()=>setLightbox(null)} className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><X className="w-5 h-5"/></button>
+          {filteredForActive.length > 1 && (
+            <>
+              <button onClick={(e)=>{e.stopPropagation(); prevLightbox();}} className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><ChevronLeft className="w-6 h-6"/></button>
+              <button onClick={(e)=>{e.stopPropagation(); nextLightbox();}} className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><ChevronRight className="w-6 h-6"/></button>
+            </>
+          )}
+          <div className="max-w-6xl w-full max-h-[90vh] flex flex-col items-center" onClick={e=>e.stopPropagation()}>
+            <img src={lightbox.imagen_url} alt={lightbox.servicio_tipo} className="max-w-full max-h-[80vh] object-contain rounded-2xl bg-white"/>
+            <div className="mt-4 bg-white/10 border border-white/20 rounded-full px-5 py-2 flex items-center gap-3">
+              <span className="text-xs font-mono uppercase text-white font-bold">{lightbox.servicio_tipo}</span>
+              <span className="text-white/40">•</span>
+              <span className="text-xs text-white/80">{lightbox.descripcion || ''}</span>
+              <span className="text-white/40">•</span>
+              <span className="text-[11px] font-mono text-white/60">{lightboxIndex+1} / {filteredForActive.length}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
