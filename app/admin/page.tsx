@@ -154,7 +154,6 @@ export default function AdminUnificadoV6() {
                 {editingClientId && <p className="text-[11px] font-mono text-green-600 text-center">Cliente seleccionado: ahora agrega servicios abajo</p>}
               </div>
 
-              {/* SECCIÓN NUEVA - SERVICIOS CON IMAGEN */}
               {editingClientId && (
                 <div className="border-t pt-6 mt-6">
                   <h3 className="font-bold text-xs uppercase tracking-widest flex items-center gap-2"><Sparkles className="w-4 h-4 text-[#ff2a2a]"/> Servicios + Imagen Demo (varios)</h3>
