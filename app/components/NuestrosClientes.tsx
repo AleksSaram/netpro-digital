@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/app/lib/supabase';
 import { ArrowUpRight, X, Globe, ExternalLink, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -25,7 +24,7 @@ const Icon = {
   Youtube: (p:any) => (<svg {...p} viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 12.2c0-3.1-.2-5.4-.5-6.1-.3-.7-.7-1.2-1.4-1.5-.7-.3-3-.5-6.1-.5h-7c-3.1 0-5.4.2-6.1.5-.7.3-1.2.8-1.5 1.5-.3.7-.5 3-.5 6.1s.2 5.4.5 6.1c.3.7.8 1.2 1.5 1.5.7.3 3 .5 6.1.5h7c3.1 0 5.4-.2 6.1-.5.7-.3 1.1-.8 1.4-1.5.3-.7.5-3 .5-6.1zM9.75 15.5v-7l6 3.5-6 3.5z"/></svg>),
 };
 
-export default function NuestrosClientesV6() {
+export default function NuestrosClientes() {
   const [clients, setClients] = useState<any[]>([]);
   const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
   const [activeCat, setActiveCat] = useState<Categoria>('Todos');
@@ -34,17 +33,47 @@ export default function NuestrosClientesV6() {
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<ServiceItem | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => { fetchAll(); }, []);
+
+  // FIX SCROLL LOCK - sin overflow hidden, usamos position fixed con scroll guardado
   useEffect(() => {
     if (selected || lightbox) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      document.body.dataset.scrollY = String(scrollY);
     } else {
-      document.body.style.overflow = 'auto';
-      document.body.style.touchAction = 'auto';
+      const scrollY = document.body.dataset.scrollY ? parseInt(document.body.dataset.scrollY) : 0;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      // Restaurar scroll sin trigger de layout thrashing
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY);
+        delete document.body.dataset.scrollY;
+      });
     }
-    return () => { document.body.style.overflow = 'auto'; document.body.style.touchAction = 'auto'; };
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+    };
   }, [selected, lightbox]);
 
   const fetchAll = async () => {
@@ -107,9 +136,9 @@ export default function NuestrosClientesV6() {
                 const items = getItemsForClient(client.id);
                 const tipos = [...new Set(items.map(i=>i.servicio_tipo))];
                 return (
-                  <div key={client.id} className="group bg-white rounded-3xl overflow-hidden border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all cursor-pointer flex flex-col will-change-transform" onClick={()=>openClient(client)}>
+                  <div key={client.id} className="group bg-white rounded-3xl overflow-hidden border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all cursor-pointer flex flex-col" onClick={()=>openClient(client)}>
                     <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
-                      <img src={client.imagen_url} alt={client.nombre} loading="lazy" decoding="async" className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"/>
+                      <img src={client.imagen_url} alt={client.nombre} loading="lazy" className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-300"/>
                       <div className="absolute top-3 left-3 bg-white px-3 py-1 rounded-full text-[10px] font-mono font-bold text-[#ff2a2a] uppercase">{client.categoria}</div>
                       {client.metrica && <div className="absolute bottom-3 left-3 bg-black/70 px-3 py-1 rounded-lg text-[11px] font-mono text-white">{client.metrica}</div>}
                     </div>
@@ -127,113 +156,95 @@ export default function NuestrosClientesV6() {
         </div>
       </section>
 
-      {/* MODAL OPTIMIZADO - SIN BACKDROP-BLUR EN MÓVIL */}
-      <AnimatePresence mode="wait">
-        {selected && (
-          <motion.div 
-            initial={{opacity:0}} 
-            animate={{opacity:1}} 
-            exit={{opacity:0}} 
-            transition={{duration:0.2, ease:'easeOut'}}
-            className="fixed inset-0 z-[100] bg-black/80 md:bg-black/60 md:backdrop-blur-sm flex flex-col md:block md:overflow-y-auto"
-            onClick={()=>setSelected(null)}
-          >
-            <div className="flex-1 flex flex-col md:min-h-full md:items-center md:justify-center md:p-6 overflow-y-auto md:overflow-visible overscroll-contain">
-              <div className="md:hidden w-full flex justify-center pt-3 pb-2 bg-white rounded-t-[2rem] sticky top-0 z-10 shrink-0"><div className="w-10 h-1.5 bg-gray-300 rounded-full"/></div>
-              
-              <motion.div 
-                initial={{y: 50, opacity:0}} 
-                animate={{y: 0, opacity:1}} 
-                exit={{y: 50, opacity:0}} 
-                transition={{duration:0.25, ease:[0.32,0.72,0,1]}}
-                className="bg-white w-full md:max-w-6xl md:rounded-[2rem] rounded-t-[2rem] rounded-b-none md:rounded-b-[2rem] shadow-2xl flex flex-col lg:flex-row overflow-hidden max-h-[94dvh] md:max-h-[88vh] mt-auto md:mt-8 mb-0 md:mb-8 will-change-transform" 
-                onClick={e=>e.stopPropagation()}
-              >
-                {/* IZQUIERDA */}
-                <div className="lg:w-[36%] bg-[#fcf8f5] flex flex-col shrink-0 border-b lg:border-b-0 lg:border-r border-white">
-                  <div className="flex md:flex-col gap-4 p-4 md:p-7">
-                    <div className="relative w-20 h-20 md:w-full md:h-auto md:aspect-[3/4] rounded-full md:rounded-2xl overflow-hidden shrink-0 bg-gray-100">
-                      <img src={selected.imagen_url} loading="eager" className="w-full h-full object-cover object-top"/>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg md:text-2xl font-extrabold leading-tight truncate md:whitespace-normal">{selected.nombre}</h3>
-                      <p className="text-[11px] md:text-xs font-mono uppercase text-[#ff2a2a] mt-1 truncate">{selected.categoria} • {selected.metrica}</p>
-                      <p className="text-[13px] md:text-sm text-gray-600 mt-2 md:mt-4 leading-relaxed line-clamp-2 md:line-clamp-none">{selected.descripcion}</p>
-                      <button onClick={()=>setSelected(null)} className="absolute top-4 right-4 md:top-3 md:right-3 w-9 h-9 rounded-full bg-white shadow flex items-center justify-center md:hidden"><X className="w-4 h-4"/></button>
-                    </div>
+      {/* MODAL - ULTRA LIGHT MÓVIL: sin motion en móvil, solo CSS */}
+      {selected && (
+        <div className="fixed inset-0 z-[100] bg-black/80 md:bg-black/60 flex flex-col md:block md:overflow-y-auto">
+          <div className="flex-1 flex flex-col md:min-h-full md:items-center md:justify-center md:p-6 overflow-y-auto overscroll-contain">
+            <div className="md:hidden w-full flex justify-center pt-3 pb-2 bg-white rounded-t-[2rem] sticky top-0 z-10 shrink-0"><div className="w-10 h-1.5 bg-gray-300 rounded-full"/></div>
+            
+            {/* En móvil sin animación de Framer, solo div con transform nativo */}
+            <div className="bg-white w-full md:max-w-6xl md:rounded-[2rem] rounded-t-[2rem] rounded-b-none md:rounded-b-[2rem] shadow-2xl flex flex-col lg:flex-row overflow-hidden max-h-[94dvh] md:max-h-[88vh] mt-auto md:mt-8 mb-0 md:mb-8 animate-[slideUp_0.25s_ease-out] md:animate-none"
+                 onClick={e=>e.stopPropagation()}
+            >
+              {/* IZQUIERDA COMPACTA */}
+              <div className="lg:w-[36%] bg-[#fcf8f5] flex flex-col shrink-0 border-b lg:border-b-0 lg:border-r border-white">
+                <div className="flex md:flex-col gap-4 p-4 md:p-7">
+                  <div className="relative w-20 h-20 md:w-full md:h-auto md:aspect-[3/4] rounded-full md:rounded-2xl overflow-hidden shrink-0 bg-gray-100">
+                    <img src={selected.imagen_url} className="w-full h-full object-cover object-top"/>
                   </div>
-                  
-                  <div className="px-4 md:px-7 pb-4 md:pb-7">
-                    <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-widest text-gray-500 mb-2 md:mb-3">Redes del cliente</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-4 h-4 md:w-5 md:h-5"/></a>}
-                      {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-4 h-4 md:w-5 md:h-5"/></a>}
-                      {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-4 h-4 md:w-5 md:h-5"/></a>}
-                      {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-4 h-4 md:w-5 md:h-5"/></a>}
-                      {selected.website_url && <a href={selected.website_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-4 h-4 md:w-5 md:h-5"/></a>}
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg md:text-2xl font-extrabold leading-tight truncate md:whitespace-normal">{selected.nombre}</h3>
+                    <p className="text-[11px] md:text-xs font-mono uppercase text-[#ff2a2a] mt-1 truncate">{selected.categoria} • {selected.metrica}</p>
+                    <p className="text-[13px] md:text-sm text-gray-600 mt-2 md:mt-4 leading-relaxed line-clamp-2 md:line-clamp-none">{selected.descripcion}</p>
+                    <button onClick={()=>setSelected(null)} className="absolute top-4 right-4 md:top-3 md:right-3 w-9 h-9 rounded-full bg-white shadow flex items-center justify-center md:hidden"><X className="w-4 h-4"/></button>
                   </div>
                 </div>
-
-                {/* DERECHA - SIN BLUR INTERNO */}
-                <div className="lg:w-[64%] p-4 md:p-7 bg-white flex flex-col overflow-y-auto flex-1 min-h-[60vh] md:min-h-0 overscroll-contain">
-                  <div className="flex justify-between items-center mb-4 shrink-0"><h4 className="font-bold text-[13px] md:text-sm uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length} trabajos</span></div>
-
-                  <div className="flex flex-wrap gap-2 mb-5 shrink-0">
-                    {[...new Set(getItemsForClient(selected.id).map((i:ServiceItem)=>i.servicio_tipo))].map((tipo:string)=>(
-                      <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-[11px] md:text-xs font-mono uppercase tracking-widest border transition-colors ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a]' : 'bg-white border-gray-200'}`}>{tipo}</button>
-                    ))}
+                <div className="px-4 md:px-7 pb-4 md:pb-7">
+                  <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-widest text-gray-500 mb-2">Redes del cliente</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {selected.instagram_url && <a href={selected.instagram_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white"><Icon.Instagram className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                    {selected.facebook_url && <a href={selected.facebook_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-600 flex items-center justify-center text-white"><Icon.Facebook className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                    {selected.tiktok_url && <a href={selected.tiktok_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-black flex items-center justify-center text-white"><Icon.TikTok className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                    {selected.youtube_url && <a href={selected.youtube_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-600 flex items-center justify-center text-white"><Icon.Youtube className="w-4 h-4 md:w-5 md:h-5"/></a>}
+                    {selected.website_url && <a href={selected.website_url} target="_blank" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-900 flex items-center justify-center text-white"><Globe className="w-4 h-4 md:w-5 md:h-5"/></a>}
                   </div>
-
-                  <div className="space-y-4 md:space-y-6 pb-6">
-                    {filteredForActive.map((item:ServiceItem)=>(
-                      <div key={item.id} className="group rounded-[1.25rem] overflow-hidden border border-gray-100 bg-[#fcf8f5] cursor-pointer" onClick={()=>openLightbox(item)}>
-                        <div className="relative bg-white p-1.5 md:p-2">
-                          <div className="absolute top-3 left-3 z-10 bg-white px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-mono font-bold uppercase shadow-sm">{item.servicio_tipo}</div>
-                          <div className="absolute top-3 right-3 z-10 bg-black/70 text-white px-2 py-1 rounded-full text-[9px] md:text-[10px] font-mono flex items-center gap-1"><Maximize2 className="w-3 h-3"/> Ampliar</div>
-                          <img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" decoding="async" className="w-full h-auto max-h-[75dvh] md:max-h-[600px] object-contain rounded-xl bg-white"/>
-                        </div>
-                        <div className="p-3 md:p-4 flex justify-between items-center bg-white">
-                          <div><p className="text-[13px] md:text-sm font-medium text-gray-900 line-clamp-1">{item.descripcion || 'Campaña '+item.servicio_tipo}</p><p className="text-[10px] md:text-[11px] font-mono text-gray-500 mt-0.5">{item.servicio_tipo}</p></div>
-                          {item.demo_url && <a href={item.demo_url} target="_blank" onClick={e=>e.stopPropagation()} className="text-[10px] md:text-[11px] font-mono uppercase text-[#ff2a2a] border border-red-100 bg-red-50 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full">Ver <ExternalLink className="w-3 h-3 inline ml-1"/></a>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button onClick={()=>setSelected(null)} className="lg:hidden mt-2 w-full border border-gray-200 bg-white rounded-full py-4 text-xs font-mono uppercase flex items-center justify-center gap-2 shrink-0"><X className="w-4 h-4"/> Cerrar</button>
-                  <div className="lg:hidden h-8 shrink-0"></div>
                 </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* LIGHTBOX - SIN BLUR EN MÓVIL */}
-      <AnimatePresence mode="wait">
-        {lightbox && (
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.15}} className="fixed inset-0 z-[200] bg-black/90 md:bg-black/90 flex items-center justify-center p-4 md:p-8" onClick={()=>setLightbox(null)}>
-            <button onClick={()=>setLightbox(null)} className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><X className="w-5 h-5"/></button>
-            {filteredForActive.length > 1 && (
-              <>
-                <button onClick={(e)=>{e.stopPropagation(); prevLightbox();}} className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><ChevronLeft className="w-6 h-6"/></button>
-                <button onClick={(e)=>{e.stopPropagation(); nextLightbox();}} className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><ChevronRight className="w-6 h-6"/></button>
-              </>
-            )}
-            <motion.div initial={{scale:0.98, opacity:0}} animate={{scale:1, opacity:1}} exit={{scale:0.98, opacity:0}} transition={{duration:0.2}} className="max-w-6xl w-full max-h-[90vh] flex flex-col items-center" onClick={e=>e.stopPropagation()}>
-              <img src={lightbox.imagen_url} alt={lightbox.servicio_tipo} className="max-w-full max-h-[80vh] object-contain rounded-2xl bg-white"/>
-              <div className="mt-4 bg-white/10 border border-white/20 rounded-full px-5 py-2 flex items-center gap-3">
-                <span className="text-xs font-mono uppercase text-white font-bold">{lightbox.servicio_tipo}</span>
-                <span className="text-white/40">•</span>
-                <span className="text-xs text-white/80">{lightbox.descripcion || ''}</span>
-                <span className="text-white/40">•</span>
-                <span className="text-[11px] font-mono text-white/60">{lightboxIndex+1} / {filteredForActive.length}</span>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+              {/* DERECHA */}
+              <div className="lg:w-[64%] p-4 md:p-7 bg-white flex flex-col overflow-y-auto flex-1 min-h-[60vh] md:min-h-0 overscroll-contain">
+                <div className="flex justify-between items-center mb-4 shrink-0"><h4 className="font-bold text-[13px] md:text-sm uppercase tracking-widest">Portafolio por servicio</h4><span className="text-[11px] font-mono bg-gray-900 text-white px-3 py-1 rounded-full">{getItemsForClient(selected.id).length} trabajos</span></div>
+                <div className="flex flex-wrap gap-2 mb-5 shrink-0">
+                  {[...new Set(getItemsForClient(selected.id).map((i:ServiceItem)=>i.servicio_tipo))].map((tipo:string)=>(
+                    <button key={tipo} onClick={()=>setActiveService(tipo)} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-[11px] md:text-xs font-mono uppercase tracking-widest border ${activeService===tipo ? 'bg-[#ff2a2a] text-white border-[#ff2a2a]' : 'bg-white border-gray-200'}`}>{tipo}</button>
+                  ))}
+                </div>
+                <div className="space-y-4 md:space-y-6 pb-6">
+                  {filteredForActive.map((item:ServiceItem)=>(
+                    <div key={item.id} className="group rounded-[1.25rem] overflow-hidden border border-gray-100 bg-[#fcf8f5] cursor-pointer" onClick={()=>openLightbox(item)}>
+                      <div className="relative bg-white p-1.5 md:p-2">
+                        <div className="absolute top-3 left-3 z-10 bg-white px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-mono font-bold uppercase shadow-sm">{item.servicio_tipo}</div>
+                        <div className="absolute top-3 right-3 z-10 bg-black/70 text-white px-2 py-1 rounded-full text-[9px] md:text-[10px] font-mono flex items-center gap-1"><Maximize2 className="w-3 h-3"/> Ampliar</div>
+                        <img src={item.imagen_url} alt={item.servicio_tipo} loading="lazy" className="w-full h-auto max-h-[75dvh] md:max-h-[600px] object-contain rounded-xl bg-white"/>
+                      </div>
+                      <div className="p-3 md:p-4 flex justify-between items-center bg-white">
+                        <div><p className="text-[13px] md:text-sm font-medium text-gray-900 line-clamp-1">{item.descripcion || 'Campaña '+item.servicio_tipo}</p><p className="text-[10px] md:text-[11px] font-mono text-gray-500 mt-0.5">{item.servicio_tipo}</p></div>
+                        {item.demo_url && <a href={item.demo_url} target="_blank" onClick={e=>e.stopPropagation()} className="text-[10px] md:text-[11px] font-mono uppercase text-[#ff2a2a] border border-red-100 bg-red-50 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full">Ver <ExternalLink className="w-3 h-3 inline ml-1"/></a>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={()=>setSelected(null)} className="lg:hidden mt-2 w-full border border-gray-200 bg-white rounded-full py-4 text-xs font-mono uppercase flex items-center justify-center gap-2 shrink-0"><X className="w-4 h-4"/> Cerrar</button>
+                <div className="lg:hidden h-8 shrink-0"></div>
+              </div>
+            </div>
+          </div>
+          <style>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } } @media (min-width: 768px) { @keyframes slideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } } }`}</style>
+        </div>
+      )}
+
+      {/* LIGHTBOX ULTRA LIGHT */}
+      {lightbox && (
+        <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4 md:p-8" onClick={()=>setLightbox(null)}>
+          <button onClick={()=>setLightbox(null)} className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><X className="w-5 h-5"/></button>
+          {filteredForActive.length > 1 && (
+            <>
+              <button onClick={(e)=>{e.stopPropagation(); prevLightbox();}} className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><ChevronLeft className="w-6 h-6"/></button>
+              <button onClick={(e)=>{e.stopPropagation(); nextLightbox();}} className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center z-50"><ChevronRight className="w-6 h-6"/></button>
+            </>
+          )}
+          <div className="max-w-6xl w-full max-h-[90vh] flex flex-col items-center" onClick={e=>e.stopPropagation()}>
+            <img src={lightbox.imagen_url} alt={lightbox.servicio_tipo} className="max-w-full max-h-[80vh] object-contain rounded-2xl bg-white"/>
+            <div className="mt-4 bg-white/10 border border-white/20 rounded-full px-5 py-2 flex items-center gap-3">
+              <span className="text-xs font-mono uppercase text-white font-bold">{lightbox.servicio_tipo}</span>
+              <span className="text-white/40">•</span>
+              <span className="text-xs text-white/80">{lightbox.descripcion || ''}</span>
+              <span className="text-white/40">•</span>
+              <span className="text-[11px] font-mono text-white/60">{lightboxIndex+1} / {filteredForActive.length}</span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
