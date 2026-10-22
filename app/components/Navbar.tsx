@@ -21,9 +21,9 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: '01 // Soluciones', href: '#servicios' },
-    { name: '02 // Clientes', href: '#clientes' },
-    { name: '03 // Contacto', href: '#contacto' },
+    { name: '01 // Servicios', href: '/#servicios' },
+    { name: '02 // Clientes', href: '/#clientes' },
+    { name: '03 // Contacto', href: '/#contacto' },
   ];
 
   return (
@@ -36,7 +36,7 @@ export default function Navbar() {
         }`}
       >
         {/* LOGOTIPO */}
-        <a href="#" className="flex items-center group cursor-pointer relative py-0.5">
+        <a href="/" className="flex items-center group cursor-pointer relative py-0.5">
           <img
             src="/logo-netpro.png"
             alt="NetPro Digital Studio"
