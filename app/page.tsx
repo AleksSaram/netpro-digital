@@ -7,7 +7,20 @@ import InteractiveCanvas from "@/app/components/InteractiveCanvas";
 import FluidBackground from "@/app/components/FluidBackground";
 import Navbar from "@/app/components/Navbar";
 import NuestrosClientes from "@/app/components/NuestrosClientes";
-import { ArrowUpRight, CheckCircle2, Send, Terminal, Calendar, MessageSquare, TrendingUp, Video, Share2, Compass, Code2, Target, Clock, Check, ChevronRight } from "lucide-react";
+import { 
+  CheckCircle2, 
+  Send, 
+  Calendar, 
+  MessageSquare, 
+  TrendingUp, 
+  Video, 
+  Share2, 
+  Compass, 
+  Code2, 
+  Target, 
+  Clock, 
+  Check 
+} from "lucide-react";
 
 const servicesData = [
   {
@@ -79,100 +92,6 @@ const renderServiceIcon = (iconName: string) => {
   }
 };
 
-// MARCAS REALES CON GRAN SALÓN KUN CORREGIDO
-const realPartners = [
-  {
-    id: "dr-noe",
-    name: "Dr Noé Herrera",
-    category: "Salud & Autoridad Médica",
-    description: "Estrategia de posicionamiento digital, pauta publicitaria en Meta Ads y optimización de captación de pacientes para consulta especializada.",
-    metrics: "+180% Leads Qualificados",
-    image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "univ-nuevo-siglo",
-    name: "Universidad Nuevo Siglo",
-    category: "Educación Superior",
-    description: "Desarrollo de campañas de captación de matrículas, gestión integral de contenidos educativos y pauta digital enfocada en admisiones.",
-    metrics: "Escalamiento Institucional",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "bugu",
-    name: "BuGu Guardería",
-    category: "Servicios Infantiles",
-    description: "Estrategia de branding, generación de confianza en comunidades locales y campañas orientadas a la retención y captación de inscripciones.",
-    metrics: "Alta Conversión Local",
-    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "clinical-manager",
-    name: "Clinical Manager",
-    category: "Software & Salud",
-    description: "Ecosistema digital y arquitectura de marca para soluciones de gestión clínica orientada a hospitales y profesionales de la salud.",
-    metrics: "Autoridad B2B",
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "ivonne-razo",
-    name: "Ivonne Razo Terramar",
-    category: "Social Commerce & Belleza",
-    description: "Sitio web interactivo con catálogo flipbook digital, automatización de prospectos y gestión de pauta comercial de alto impacto.",
-    metrics: "Catálogo Interactivo",
-    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "rs-mobiliario",
-    name: "RS Mobiliario",
-    category: "Diseño & Mobiliario de Alta Gama",
-    description: "Exhibición digital de portafolio residencial y comercial, campañas visuales de captación de clientes de diseño de interiores.",
-    metrics: "Exhibición Premium",
-    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "gran-salon-kun",
-    name: "Gran Salón Kun",
-    category: "Eventos & Salones",
-    description: "Estrategia integral de posicionamiento digital, identidad visual y campañas de atracción comercial en plataformas interactivas para eventos.",
-    metrics: "Posicionamiento Regional",
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "academia-andrea",
-    name: "Academia Andrea",
-    category: "Formación & Estética",
-    description: "Campañas de prospección para cursos intensivos, creación de contenido audiovisual y automatización de admisiones por WhatsApp.",
-    metrics: "Llenado de Cursos",
-    image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "saboreate",
-    name: "Saboreate Carritos de Snacks",
-    category: "Eventos & Experiencias",
-    description: "Estrategia de redes sociales, dirección de arte para eventos sociales y corporativos, y pauta publicitaria local.",
-    metrics: "Agenda Reventada",
-    image: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  },
-  {
-    id: "jl-event",
-    name: "JL Event Planers",
-    category: "Bodas & Eventos de Lujo",
-    description: "Diseño web de experiencias inmersivas, branding de alto nivel y pauta publicitaria segmentada para bodas destino y eventos exclusivos.",
-    metrics: "Bodas & Destinos VIP",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1000",
-    link: "#"
-  }
-];
-
 const timeSlots = [
   "09:00 AM - 09:45 AM",
   "10:00 AM - 10:45 AM",
@@ -186,9 +105,6 @@ const timeSlots = [
 export default function Home() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('all');
-  
-  const [expandedPartner, setExpandedPartner] = useState<string | null>(realPartners[0].id);
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [clientName, setClientName] = useState('');
@@ -210,7 +126,7 @@ export default function Home() {
     if (!selectedDate || !selectedSlot || !clientName) return;
     
     const message = encodeURIComponent(`Hola, soy *${clientName}*. Quiero agendar una sesión estratégica de 45 minutos para el día *${selectedDate}* en el horario de *${selectedSlot}*. Quedo atento a la confirmación.`);
-    window.open(`https://wa.me/5627000847?text=${message}`, '_blank');
+    window.open(`https://wa.me/525627000847?text=${message}`, '_blank');
     setIsBookingOpen(false);
   };
 
@@ -221,11 +137,10 @@ export default function Home() {
       <FluidBackground />
       <InteractiveCanvas />
 
-      {/* ================= HERO ALINEADO A LA IZQUIERDA ================= */}
+      {/* HERO */}
       <section className="relative min-h-[95vh] flex items-center px-6 pt-44 pb-24 z-10">
         <div className="max-w-7xl mx-auto w-full">
           <div className="max-w-4xl">
-            
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -266,7 +181,7 @@ export default function Home() {
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4"
             >
               <a
-                href="https://wa.me/5627000847"
+                href="https://wa.me/525627000847"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2.5 bg-[#ff2a2a] text-white font-semibold px-9 py-4 rounded-full hover:bg-red-600 transition-all duration-300 shadow-xl shadow-red-500/20 text-xs tracking-widest uppercase"
@@ -283,15 +198,13 @@ export default function Home() {
                 <span>Agendar Sesión (45 min)</span>
               </button>
             </motion.div>
-
           </div>
         </div>
       </section>
 
-      {/* ================= BENTO GRID DE LOS 6 PILARES ================= */}
+      {/* BENTO GRID DE PILARES */}
       <section id="servicios" className="py-28 px-6 relative z-10 bg-white/30 backdrop-blur-md">
         <div className="max-w-7xl mx-auto">
-          
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div>
               <span className="text-xs font-mono tracking-widest uppercase text-[#ff2a2a] bg-red-50/80 backdrop-blur-xs px-3 py-1 rounded-full border border-red-100 font-semibold">
@@ -358,17 +271,15 @@ export default function Home() {
               </Tilt>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* ================= NUESTROS CLIENTES - NUEVO SISTEMA POR CATEGORÍAS ================= */}
+      {/* SECCIÓN DINÁMICA SUPABASE DE NUESTROS CLIENTES */}
       <NuestrosClientes />
 
-      {/* ================= CONTACTO STUDIO (CONTÁCTANOS Y EMPIEZA A CRECER) ================= */}
+      {/* FORMULARIO DE CONTACTO */}
       <section id="contacto" className="py-28 px-6 relative z-10 border-t border-white/40 bg-transparent">
         <div className="max-w-4xl mx-auto bg-white/60 backdrop-blur-2xl rounded-3xl p-8 sm:p-14 border border-white/90 shadow-[0_20px_50px_rgb(0,0,0,0.06)] relative">
-          
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-xs font-mono tracking-widest uppercase text-[#ff2a2a] bg-red-50/80 backdrop-blur-xs px-3 py-1 rounded-full border border-red-100 font-semibold">
               03 // Contacto Directo
@@ -453,11 +364,10 @@ export default function Home() {
               </motion.form>
             )}
           </AnimatePresence>
-
         </div>
       </section>
 
-      {/* ================= CALENDARIO DE SESIÓN (45 MIN) ================= */}
+      {/* CALENDARIO MODAL */}
       {isBookingOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md px-4">
           <motion.div 
